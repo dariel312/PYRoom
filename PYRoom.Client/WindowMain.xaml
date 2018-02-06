@@ -8,23 +8,41 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid Name="sidebar" Width="170" VerticalAlignment="Stretch" Background="#eeeeee">
+            <Grid.RowDefinitions>
+                <RowDefinition Height ="Auto"/>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
             <Button Height="32" Margin="15,15,15,0" VerticalAlignment="Top" Background="White" Click="NewRoom_Click">New Room</Button>
+            <ListBox Margin="15,15,15,10" VerticalAlignment="Stretch" Grid.Row="1" ItemsSource="{Binding chatRoomList}" DisplayMemberPath="name" />
         </Grid>
         <Grid Name="main" VerticalAlignment="Stretch" Margin="0,0,0,0" Grid.Column="1">
-            <TabControl>
-                <TabItem Header="My Chat Room">
-                    <Grid>
-                        <TextBox TextWrapping="Wrap" Text="TextBox" AcceptsReturn="true" Margin="10,10,10,0" VerticalAlignment="Top" Height="255"/>
-                        <TextBox TextWrapping="Wrap" Text="TextBox" Margin="10,0,10,10" VerticalAlignment="Bottom" Height="87"/>
-                    </Grid>
-
-                </TabItem>
-                <TabItem Header="Johns Chat Room" />
-                <TabItem Header="Details" />
+            <TabControl ItemsSource="{Binding chatRooms}">
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock
+                    Text="{Binding name}" />
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="80"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="150"/>
+                            </Grid.RowDefinitions>
+                            <TextBox TextWrapping="Wrap" AcceptsReturn="true" Margin="10,10,10,0" Grid.ColumnSpan="2" Text="{Binding messages}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                            <TextBox TextWrapping="Wrap" Margin="10,0,90,11" VerticalAlignment="Bottom" Height="129" Grid.ColumnSpan="2" Grid.Row="1" Text="{Binding myMessage}"/>
+                            <Button Margin="0,99,10,0" Grid.Row="1" VerticalAlignment="Top" Height="40" RenderTransformOrigin="-5.307,0.55" Grid.Column="1" HorizontalAlignment="Right" Width="70">Send</Button>
+                        </Grid>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
             </TabControl>
             <Button Width="32" Height="32" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Left" Background="White" Click="SideBar_ToggleClick">&gt;</Button>
         </Grid>
     </Grid>
-
 </Window> 
     
