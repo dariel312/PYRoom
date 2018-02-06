@@ -7,15 +7,16 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <Grid Name="sidebar" Width="170" VerticalAlignment="Stretch" Background="#eeeeee">
+        <Grid Name="sidebar" Width="170" VerticalAlignment="Stretch" Background="#FF434347">
             <Grid.RowDefinitions>
                 <RowDefinition Height ="Auto"/>
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Button Height="32" Margin="15,15,15,0" VerticalAlignment="Top" Background="White" Click="NewRoom_Click">New Room</Button>
-            <ListBox Margin="15,15,15,10" VerticalAlignment="Stretch" Grid.Row="1" ItemsSource="{Binding chatRoomList}" DisplayMemberPath="name" />
+            <ListBox Margin="15,15,15,10" VerticalAlignment="Stretch" Grid.Row="1" ItemsSource="{Binding chatRoomList}" DisplayMemberPath="name" Background="Transparent" BorderBrush="#FF7F7E86" Foreground="#FFD7D7D7">
+            </ListBox>
         </Grid>
-        <Grid Name="main" VerticalAlignment="Stretch" Margin="0,0,0,0" Grid.Column="1">
+        <Grid Name="main" VerticalAlignment="Stretch" Margin="0,0,0,0" Grid.Column="1" >
             <TabControl ItemsSource="{Binding chatRooms}">
                 <TabControl.ItemTemplate>
                     <DataTemplate>
@@ -31,12 +32,14 @@
                                 <ColumnDefinition Width="80"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
                                 <RowDefinition Height="*"/>
-                                <RowDefinition Height="150"/>
+                                <RowDefinition Height="100"/>
                             </Grid.RowDefinitions>
-                            <TextBox TextWrapping="Wrap" AcceptsReturn="true" Margin="10,10,10,0" Grid.ColumnSpan="2" Text="{Binding messages}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" />
-                            <TextBox TextWrapping="Wrap" Margin="10,0,90,11" VerticalAlignment="Bottom" Height="129" Grid.ColumnSpan="2" Grid.Row="1" Text="{Binding myMessage}"/>
-                            <Button Margin="0,99,10,0" Grid.Row="1" VerticalAlignment="Top" Height="40" RenderTransformOrigin="-5.307,0.55" Grid.Column="1" HorizontalAlignment="Right" Width="70">Send</Button>
+                            <Button HorizontalAlignment="Left" FontWeight="SemiBold" Grid.Row="1" Background="#00000000" BorderBrush="#00000000" Foreground="#FFD12222" FontSize="14">X</Button>
+                            <TextBox Margin="0,10,0,0" TextWrapping="Wrap" AcceptsReturn="true" Grid.ColumnSpan="2" Grid.Row="1"  Text="{Binding messages}" VerticalScrollBarVisibility="Visible"/>
+                            <TextBox Margin="10,10,0,10" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.ColumnSpan="1" Grid.Row="2" Text="{Binding myMessage}" VerticalScrollBarVisibility="Visible"/>
+                            <Button Margin="10,0,10,10" VerticalAlignment="Bottom" Height="30"  Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" Background="#FF118EF5" BorderBrush="#00000000" Foreground="#FFFFFBFB">Send</Button>
                         </Grid>
                     </DataTemplate>
                 </TabControl.ContentTemplate>
