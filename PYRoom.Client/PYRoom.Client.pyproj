@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>e9b02838-9b49-45a9-9c6d-0fe143a34a3d</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PYRoom.Client.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -14,6 +14,7 @@
     <OutputPath>.</OutputPath>
     <Name>PYRoom.Client</Name>
     <RootNamespace>PYRoom.Client</RootNamespace>
+    <DebugStdLib>False</DebugStdLib>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,10 +25,13 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Client.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="NewChatRoomPrompt.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PYRoom.Client.py" />
+    <Compile Include="main.py" />
     <Compile Include="ViewModels.py" />
     <Compile Include="WindowMain.py">
       <SubType>Code</SubType>

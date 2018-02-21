@@ -1,8 +1,14 @@
 import wpf
+from System import TimeSpan
 from System.Windows.Controls import *
 from System.Windows import *
+from System.Windows.Threading import *
 from NewChatRoomPrompt import *
 from ViewModels import *
+from Client import *
+import socket
+import sys
+import threading
 
 class WindowMain(Window):
 
@@ -10,7 +16,32 @@ class WindowMain(Window):
 		self.ui = wpf.LoadComponent(self, 'WindowMain.xaml')
 		self.sidebar = self.ui.sidebar
 		self.DataContext = AppVM()	#holds all the data to be displayed
+		self.model = AppVM()
+
+		#setup ui threadupdate
+		self.updater = DispatcherTimer();
+		self.updater.Tick += self.update_UI
+		self.updater.Interval = TimeSpan(0,0,1)
+		self.updater.Start()
+	    #setup connection
+		self.client = Client()
+		self.client.connect(host = '127.0.0.1')
+
+		#setup thread
+		self.clientThread = threading.Thread(target=self.client_thread)
+		self.clientThread.start()
 		
+		#FORM WONT SHOW WITHOUT THIS LINE WTF
+
+	def client_thread(self):
+		self.client.send("Jorge".encode('utf8'))
+		while True:
+			#get data from socket
+		    data = self.client.receive()
+		    self.model.messages += data
+
+	def update_UI(self, sender, e):
+		self.ui.messages.Text = self.model.messages
 
 	def SideBar_ToggleClick(self, sender, e):
 		if (self.sidebar.Visibility == Visibility.Collapsed):

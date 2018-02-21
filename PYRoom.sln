@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.27130.2020
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PYRoom.Core", "PYRoom\PYRoom.Core.pyproj", "{D3D0B304-9643-4AAA-8E0C-C187F02A2D10}"
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PYRoom.Client", "PYRoom.Client\PYRoom.Client.pyproj", "{E9B02838-9B49-45A9-9C6D-0FE143A34A3D}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PYRoom.Server", "PYRoom.Server\PYRoom.Server.pyproj", "{B4379474-94F4-4E1D-B44F-5AE1F09D5A9A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,6 +19,8 @@ Global
 		{D3D0B304-9643-4AAA-8E0C-C187F02A2D10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9B02838-9B49-45A9-9C6D-0FE143A34A3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E9B02838-9B49-45A9-9C6D-0FE143A34A3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4379474-94F4-4E1D-B44F-5AE1F09D5A9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4379474-94F4-4E1D-B44F-5AE1F09D5A9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

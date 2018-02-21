@@ -13,5 +13,6 @@ class ChatRoomListItemVM():
 
 class AppVM():
     def __init__(self):
-        self.chatRooms = [ChatRoomVM()]
+        self.messages = ''
+        self.myMessages = ''
         self.chatRoomList = [ChatRoomListItemVM(), ChatRoomListItemVM(), ChatRoomListItemVM(), ChatRoomListItemVM(), ChatRoomListItemVM()]
