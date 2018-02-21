@@ -21,7 +21,7 @@ class WindowMain(Window):
 		#setup ui threadupdate
 		self.updater = DispatcherTimer()
 		self.updater.Tick += self.update_UI
-		self.updater.Interval = TimeSpan(0,0,1)
+		self.updater.Interval = TimeSpan(0,0,0,0,33)
 		self.updater.Start()
 
 	    #setup connection
@@ -56,9 +56,10 @@ class WindowMain(Window):
 			MessageBox.Show(self.newPrompt.getName())
 		else:
 			MessageBox.Show("You canceled this new room.") 
+
 	def send_message(self, message):
-		self.client.send(message)
+	    pass
 
 	def Send_Click(self, sender, e):
-		self.send_message(self.ui.myMessage.Text)
-		self.ui.myMessage.Test = ''
+		self.client.send(self.ui.myMessage.Text)
+		self.ui.myMessage.Text = ''

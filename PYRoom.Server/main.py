@@ -2,15 +2,10 @@
 import socket
 import sys
 import threading
-import Const
+from Const import *
 
 class Server:
     SERVER_CONFIG = {"BACKLOG": 15}
-
-    HELP_MESSAGE = """> The list of commands available are:
-
-/quit - Exits the program.
-/list - Lists all the users in the chat room.\n\n""".encode('utf8')
 
     def __init__(self, host=socket.gethostbyname('localhost'), port=50000, allowReuseAddress=True):
         self.host = host
@@ -57,10 +52,10 @@ class Server:
     def client_thread(self, clientSocket, clientAddress, size=4096):
         name = clientSocket.recv(size).decode('utf8')
 
-        welcomeMessage = '> Welcome %s, type /help for a list of helpful commands.\n\n' % name
+        welcomeMessage = Const.WELCOME_MESSAGE % name
         clientSocket.send(welcomeMessage.encode('utf-8'))
         chatMessage = '\n> %s has joined the chat!\n' % name
-        self.broadcast_message(chatMessage)
+        self.broadcast_message(chatMessage, name)
         self.clients[clientSocket] = name
 
         while True:
@@ -90,7 +85,7 @@ class Server:
         clientSocket.send(message.encode('utf8'))
 
     def help(self, clientSocket):
-        clientSocket.send(Server.HELP_MESSAGE)
+        clientSocket.send(Const.HELP_MESSAGE)
 
     def server_shutdown(self):
         print("Shutting down chat server.\n")
