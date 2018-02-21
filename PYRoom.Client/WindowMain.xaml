@@ -30,7 +30,7 @@
                 <!--<Button HorizontalAlignment="Left" FontWeight="SemiBold" Grid.Row="1" Background="#00000000" BorderBrush="#00000000" Foreground="#FFD12222" FontSize="14">X</Button>-->
                 <TextBox Margin="10,10,10,10" TextWrapping="Wrap" AcceptsReturn="true" Grid.ColumnSpan="2" Grid.Row="1" Name="messages"  Text="test" VerticalScrollBarVisibility="Visible"/>
                 <TextBox Margin="10,10,0,10" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.ColumnSpan="1" Grid.Row="2" Text="{Binding myMessage, Mode=TwoWay}" VerticalScrollBarVisibility="Visible"/>
-                <Button Margin="10,0,10,10" VerticalAlignment="Bottom" Height="30"  Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" Background="#FF118EF5" BorderBrush="#00000000" Foreground="#FFFFFBFB">Send</Button>
+                <Button Margin="10,0,10,10" VerticalAlignment="Bottom" Height="30"  Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" Background="#FF118EF5" BorderBrush="#00000000" Foreground="#FFFFFBFB" Click="Send_Click">Send</Button>
             </Grid>
             <Button Width="32" Height="32" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Left" Background="White" Click="SideBar_ToggleClick">&gt;</Button>
         </Grid>

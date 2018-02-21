@@ -19,10 +19,11 @@ class WindowMain(Window):
 		self.model = AppVM()
 
 		#setup ui threadupdate
-		self.updater = DispatcherTimer();
+		self.updater = DispatcherTimer()
 		self.updater.Tick += self.update_UI
 		self.updater.Interval = TimeSpan(0,0,1)
 		self.updater.Start()
+
 	    #setup connection
 		self.client = Client()
 		self.client.connect(host = '127.0.0.1')
@@ -31,15 +32,14 @@ class WindowMain(Window):
 		self.clientThread = threading.Thread(target=self.client_thread)
 		self.clientThread.start()
 		
-		#FORM WONT SHOW WITHOUT THIS LINE WTF
-
 	def client_thread(self):
-		self.client.send("Jorge".encode('utf8'))
+		self.client.send("Jorge")
 		while True:
 			#get data from socket
 		    data = self.client.receive()
 		    self.model.messages += data
 
+    #updates ui for data changes
 	def update_UI(self, sender, e):
 		self.ui.messages.Text = self.model.messages
 
@@ -55,4 +55,10 @@ class WindowMain(Window):
 		if prompt.result:
 			MessageBox.Show(self.newPrompt.getName())
 		else:
-			MessageBox.Show("You canceled this new room.");
+			MessageBox.Show("You canceled this new room.") 
+	def send_message(self, message):
+		self.client.send(message)
+
+	def Send_Click(self, sender, e):
+		self.send_message(self.ui.myMessage.Text)
+		self.ui.myMessage.Test = ''
