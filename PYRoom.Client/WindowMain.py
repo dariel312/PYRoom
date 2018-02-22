@@ -15,7 +15,6 @@ class WindowMain(Window):
 	def __init__(self):
 		self.ui = wpf.LoadComponent(self, 'WindowMain.xaml')
 		self.sidebar = self.ui.sidebar
-		self.DataContext = AppVM()	#holds all the data to be displayed
 		self.model = AppVM()
 
 		#setup ui threadupdate
@@ -24,25 +23,13 @@ class WindowMain(Window):
 		self.updater.Interval = TimeSpan(0,0,0,0,33)
 		self.updater.Start()
 
-	    #setup connection
 		self.client = Client()
-		self.client.connect(host = '127.0.0.1')
-
-		#setup thread
-		self.clientThread = threading.Thread(target=self.client_thread)
-		self.clientThread.start()
-		
-	def client_thread(self):
-		self.client.send("Jorge")
-		while True:
-			#get data from socket
-		    data = self.client.receive()
-		    self.model.messages += data
-
+	
     #updates ui for data changes
 	def update_UI(self, sender, e):
 		self.ui.messages.Text = self.model.messages
 
+	#GUI STUFF
 	def SideBar_ToggleClick(self, sender, e):
 		if (self.sidebar.Visibility == Visibility.Collapsed):
 			self.sidebar.Visibility = Visibility.Visible
@@ -57,9 +44,30 @@ class WindowMain(Window):
 		else:
 			MessageBox.Show("You canceled this new room.") 
 
-	def send_message(self, message):
-	    pass
-
 	def Send_Click(self, sender, e):
-		self.client.send(self.ui.myMessage.Text)
+		self.handle_command(self.ui.myMessage.Text)
 		self.ui.myMessage.Text = ''
+
+	#CLIENT STUFF
+	def client_thread(self):
+		while True:
+			#get data from socket
+		    data = self.client.receive()
+		    self.model.messages += data
+
+	def send_message(self, message):
+	    self.client.send(message)
+
+	def connect(self, params):
+		self.client.connect(host = '127.0.0.1')
+		self.clientThread = threading.Thread(target=self.client_thread)
+		self.clientThread.start()
+
+	def handle_command(self, msg):
+		params = msg.split(' ')
+		op = params[0].lower()
+
+		if op == '/connect':
+			self.connect(params)
+		else:
+			self.send_message(msg)

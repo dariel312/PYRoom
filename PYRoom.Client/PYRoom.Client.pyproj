@@ -10,11 +10,12 @@
     <WorkingDirectory>.</WorkingDirectory>
     <IsWindowsApplication>True</IsWindowsApplication>
     <InterpreterId>IronPython|2.7-32</InterpreterId>
-    <LaunchProvider>IronPython (.NET) launcher</LaunchProvider>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
     <OutputPath>.</OutputPath>
     <Name>PYRoom.Client</Name>
     <RootNamespace>PYRoom.Client</RootNamespace>
     <DebugStdLib>False</DebugStdLib>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
