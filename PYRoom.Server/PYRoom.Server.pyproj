@@ -21,7 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="client.py">
+    <Compile Include="ChatClient.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Const.py">

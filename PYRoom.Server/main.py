@@ -3,6 +3,7 @@ import socket
 import sys
 import threading
 from Const import *
+from ChatClient import *
 
 class Server:
 	SERVER_CONFIG = {"BACKLOG": 15}
@@ -31,14 +32,18 @@ class Server:
 
 	def listen_thread(self, defaultGreeting="> Welcome to our chat app!!! What is your name?\n"):
 		while True:
+
 			print("Waiting for a client to establish a connection\n")
 			clientSocket, clientAddress = self.serverSocket.accept()
 			print("Connection established with IP address {0} and port {1}\n".format(clientAddress[0], clientAddress[1]))
+			
 			clientSocket.send(defaultGreeting.encode('utf8'))
 			clientThread = threading.Thread(target=self.client_thread, args=(clientSocket, clientAddress))
+			
 			self.clientThreadList.append(clientThread)
 			clientThread.start()
 
+		#if we exit this while loop then were no longer accepting connections
 		for thread in self.clientThreadList:
 			if thread.is_alive():
 				thread.join()
@@ -52,14 +57,20 @@ class Server:
 	def client_thread(self, clientSocket, clientAddress, size=4096):
 		name = clientSocket.recv(size).decode('utf8')
 
+		#send welcome message
 		welcomeMessage = Const.WELCOME_MESSAGE % name
 		clientSocket.send(welcomeMessage.encode('utf-8'))
+
+		#send joined chat message
 		chatMessage = '\n> %s has joined the chat!\n' % name
 		self.broadcast_message(chatMessage, name)
-		self.clients[clientSocket] = name
+
+		#add user to list
+		client = ChatClient(clientSocket, name)
+		self.clients[name] = client
 
 		while True:
-			chatMessage = clientSocket.recv(size).decode('utf8')
+			chatMessage = client.receive()
 			params = chatMessage.split(' ')
 			op = params[0].lower()
 
@@ -75,6 +86,22 @@ class Server:
 			else:
 				self.broadcast_message(chatMessage + '\n' , name + ': ')
 
+	def server_shutdown(self):
+		print("Shutting down chat server.\n")
+		self.serverSocket.shutdown(socket.SHUT_RDWR)
+		self.serverSocket.close()
+
+	def broadcast_message(self, message, senderName=''):
+		for name in self.clients:
+			if name + ': ' != senderName:
+				self.clients[user].send(senderName + message)
+			else:
+				self.clients[user].send('You: ' + message)
+
+	def send(self, sock, msg):
+		sock.send(msg.encode('utf8'))
+
+	#handlers
 	def quit(self, clientSocket, clientAddress, name=''):
 		clientSocket.send('/quit'.encode('utf8'))
 		clientSocket.close()
@@ -84,7 +111,7 @@ class Server:
 
 	def list_all_users(self, clientSocket, name=''):
 		message = Const.LIST_ALL_USERS
-		users_list = ["You" if user==name else user for user in self.clients.values()]
+		users_list = ["You" if user == name else user for user in self.clients.values()]
 		message = message + ", ".join(users_list) + "\n"
 		clientSocket.send(message.encode('utf8'))
 
@@ -94,20 +121,6 @@ class Server:
 	def help(self, clientSocket):
 		self.send(clientSocket, Const.HELP_MESSAGE)
 
-	def server_shutdown(self):
-		print("Shutting down chat server.\n")
-		self.serverSocket.shutdown(socket.SHUT_RDWR)
-		self.serverSocket.close()
-
-	def broadcast_message(self, message, name=''):
-		for socket in self.clients:
-			if self.clients[socket] + ': ' != name:
-				socket.send((name + message).encode('utf8'))
-			else:
-				socket.send(('You: ' + message).encode('utf8'))
-
-	def send(self, sock, msg):
-		sock.send(msg.encode('utf8'))
 
 def main():
     chatServer = Server()
