@@ -6,13 +6,6 @@ import Channel
 class Server:
     SERVER_CONFIG = {"MAX_CONNECTIONS": 15}
 
-    HELP_MESSAGE = """\n> The list of commands available are:
-
-/help                   - Show the instructions
-/join [channel_name]    - To create or switch to a channel.
-/quit                   - Exits the program.
-/list                   - Lists all available channels.\n\n""".encode('utf8')
-
     def __init__(self, host=socket.gethostbyname('localhost'), port=50000, allowReuseAddress=True):
         self.address = (host, port)
         self.channels = {} # Channel Name -> Channel

@@ -4,6 +4,7 @@ import sys
 import threading
 from Const import *
 from ChatClient import *
+from Channel import *
 
 class Server:
 	SERVER_CONFIG = {"MAX_CONNECTIONS": 15}
@@ -15,7 +16,6 @@ class Server:
 		self.clients = {}
 		self.clientThreadList = []
 		self.channels = {} # Channel Name -> Channel
-		self.channels_client_map = {} # Client Name -> Channel Name
 
 		try:
 			self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -56,23 +56,18 @@ class Server:
 		listenerThread.join()
 
 	def client_thread(self, clientSocket, clientAddress, size=4096):
-		#send greeting
+		#send greeting get name
 		clientSocket.send("> Welcome to our chat app!!! What is your name?\n".encode('utf8'))
-
-		name = clientSocket.recv(size).decode('utf8')
+		clientName = clientSocket.recv(size).decode('utf8')
 
 		#add user to list
-		client = ChatClient(clientSocket, name)
-		self.clients[name] = client
+		client = ChatClient(clientSocket, clientName)
+		self.clients[clientName] = client
 
 		#send welcome message
-		welcomeMessage = Const.WELCOME_MESSAGE % name
+		welcomeMessage = Const.WELCOME_MESSAGE % clientName
 		client.send(welcomeMessage)
 
-		#send joined chat message
-		chatMessage = '\n> %s has joined the chat!\n' % name
-		self.broadcast_message(chatMessage, name)
-	
 		#handler loop
 		while True:
 			chatMessage = client.receive()
@@ -83,27 +78,60 @@ class Server:
 				self.quit(clientSocket, clientAddress, name)
 				break
 			elif op == '/list':
-				self.list_all_users(client, name)
+				self.list_all_users(client)
 			elif op == '/ping':
 				self.ping(client, params[1:])
 			elif chatMessage == '/help':
 				self.help(client)
+			elif '/join' in chatMessage:
+				self.join(client, chatMessage)
 			else:
-				self.broadcast_message(chatMessage + '\n' , name + ': ')
+				self.send_message(client, chatMessage)
 
 	def server_shutdown(self):
 		print("Shutting down chat server.\n")
 		self.serverSocket.shutdown(socket.SHUT_RDWR)
 		self.serverSocket.close()
 
-	def broadcast_message(self, message, senderName=''):
-		for client in self.clients.values():
-			if client.name + ': ' != senderName:
-				client.send(senderName + message)
-			else:
-				client.send('You: ' + message)
+	def get_user_channel(self, client):
+		for chnl in self.channels.values():
+			if client.name in chnl.clients: #returns first occurence of user in channel
+				return chnl
+		return None
 
 	#handlers
+	def send_message(self, client, chatMessage):
+		usrChnl = self.get_user_channel(client)
+
+		if usrChnl != None: #if user is in channel broadcast
+			usrChnl.broadcast_message(chatMessage, client)
+		else:
+			client.send(Const.NOT_CHANNEL_MESSAGE)
+
+	def join(self, client, chatMessage):
+		isInSameRoom = False
+
+		 #handle error
+		if len(chatMessage.split()) != 2:
+			self.help(client)
+			return 
+
+		channelName = chatMessage.split()[1]
+		usrChnl = self.get_user_channel(client)
+		targetChnl = self.channels.get(channelName)
+
+		#create channel if doesnt exist
+		if targetChnl == None:
+			targetChnl = Channel(channelName)
+			self.channels[channelName] = targetChnl
+
+		#if user is in channel
+		if usrChnl == targetChnl:
+			client.send(Const.ALREADY_IN_CHANNEL + channelName)
+		else:
+			targetChnl.add_client(client)
+
+
 	def quit(self, clientSocket, clientAddress, name=''):
 		clientSocket.send('/quit'.encode('utf8'))
 		clientSocket.close()
