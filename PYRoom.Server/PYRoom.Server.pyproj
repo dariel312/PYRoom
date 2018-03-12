@@ -11,6 +11,8 @@
     <OutputPath>.</OutputPath>
     <Name>PYRoom.Server</Name>
     <RootNamespace>PYRoom.Server</RootNamespace>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,9 +23,11 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Channel.py" />
     <Compile Include="ChatClient.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ChatServer2.py" />
     <Compile Include="Const.py">
       <SubType>Code</SubType>
     </Compile>
