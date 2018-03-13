@@ -6,7 +6,7 @@ class Channel:
 		self.name = name
 
 	def add_client(self, client):
-		self.clients[client.name] = client
+		self.clients[client.uid] = client
 		self.welcome_client(client)
 
 	def welcome_client(self, client):

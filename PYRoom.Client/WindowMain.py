@@ -40,7 +40,7 @@ class WindowMain(Window):
 	#GUI STUFF
 	def MyMessage_KeyDown(self, sender, e):
 		if e.Key == Key.Return:
-			self.sumbit_message()
+			self.submit_message()
 
 	def SideBar_ToggleClick(self, sender, e):
 		if (self.sidebar.Visibility == Visibility.Collapsed):
@@ -68,7 +68,7 @@ class WindowMain(Window):
 	
 	#CLIENT STUFF
 	#submits message from text box
-	def sumbit_message(self):
+	def submit_message(self):
 		self.handle_send_command(self.ui.myMessage.Text)
 		self.ui.myMessage.Text = ''
 
@@ -86,7 +86,7 @@ class WindowMain(Window):
 		params = msg.split(' ')
 		op = params[0].lower()
 
-		if op == '/connect':
+		if op == '/connect' and not self.client.isClientConnected:
 			self.connect(params)
 		else:
 			self.send_message(msg)
@@ -104,8 +104,8 @@ class WindowMain(Window):
 				op = params[0]
 				if op == '/servername':
 					self.recv_server_name(" ".join(params[1:]))
-				elif op == '/quit':
-					self.client.disconnect()
+				#elif op == '/quit':
+				#	self.client.disconnect()
 				else:
 					self.model.messages += command + "\n"
 					self.isNewMessage = True

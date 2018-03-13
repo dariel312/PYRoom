@@ -1,7 +1,8 @@
 class ChatClient(object):
-	def __init__ (self, socket, name):
+	def __init__ (self, socket, uid):
 		self.socket = socket
-		self.name = name
+		self.uid = str(uid)
+		self.name = "anonymous#" + ''.join(self.uid[0:8])
 		self.thread = None
 		self.isAway = False
 		self.awayMessage = ""

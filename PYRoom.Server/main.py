@@ -2,15 +2,18 @@
 import socket
 import sys
 import threading
+import uuid
 from Const import *
 from ChatClient import *
 from Channel import *
+from User import *
 
 class Server:
 	SERVER_CONFIG = {
 		"MAX_CONNECTIONS": 15,
 		"SERVER_NAME": "Dariel's Chat",
-		"VERSION": "1.0"
+		"VERSION": "1.0",
+		"DB_PATH": "./"
 	}
 	BANNER = ""
 
@@ -63,20 +66,18 @@ class Server:
 		listenerThread.join()
 
 	def client_thread(self, clientSocket, clientAddress, size=4096):
-		
-		#send greeting get name
-		clientSocket.send(self.BANNER.encode('utf8'))
-		clientSocket.send(Const.WELCOME_INITIAL.encode('utf8'))
-		clientName = clientSocket.recv(size).decode('utf8')
-
-		#add user to list
-		client = ChatClient(clientSocket, clientName)
-		self.clients[clientName] = client
-		self.send_server_name(client)
-
 	
+		#add user to list
+		client = ChatClient(clientSocket, uuid.uuid4())
+		self.clients[client.uid] = client
+	
+		#send greeting get name
+		client.send(self.BANNER)
+		client.send(Const.WELCOME_INITIAL)
+		self.send_server_name(client) #sets the client the server name (Meta)
+
 		#send welcome message
-		welcomeMessage = Const.WELCOME_MESSAGE % clientName
+		welcomeMessage = Const.WELCOME_MESSAGE % client.name
 		client.send(welcomeMessage)
 
 		#handler loop
@@ -92,12 +93,15 @@ class Server:
 				self.list_all_channels(client)
 			elif op == '/ping':
 				self.ping(client, " ".join(params[1:]))
-			elif chatMessage == '/help':
+			elif op == '/nick':
+				self.nick(client, params)
+			elif op == '/help':
 				self.help(client)
-			elif '/join' in chatMessage:
+			elif op == '/join':
 				self.join(client, chatMessage)
 			elif op == '/version':
 				self.version(client)
+
 			elif op == '/away':
 				self.away(client)
 			else:
@@ -110,12 +114,27 @@ class Server:
 
 	def get_user_channel(self, client):
 		for chnl in self.channels.values():
-			if client.name in chnl.clients: #returns first occurence of user in channel
+			if client.uid in chnl.clients: #returns first occurence of user in channel
 				return chnl
 		return None
 
 	def send_server_name(self, client):
 		client.send("/servername " + self.SERVER_CONFIG["SERVER_NAME"])
+	
+	def load_users(self):
+		text = open(self.SERVER_CONFIG["DB_PATH"] + "users.txt").read()
+		users = []
+		for line in text.split("\n"):
+			if line == "": continue
+
+			params = line.split(' ')
+			usr = User()
+			usr.uid = params[0]
+			usr.name = params[1]
+			usr.password = params[2]
+			usr.role = params[3]
+			users.append(usr)
+		return users
 
 	#handlers
 	def send_message(self, client, chatMessage):
@@ -153,6 +172,31 @@ class Server:
 
 	def version(self, client):
 		client.send("\n> Version: " + self.SERVER_CONFIG["VERSION"])
+
+	def nick(self, client, params):
+		users = self.load_users()
+
+		if len(params) is not 2: #if user didnt put param
+			self.help(client)
+			return
+
+		name = params[1]
+
+		if name in [user.name for user in users]: #name is taken
+			client.send(Const.USER_TAKEN)
+			return
+
+		oldName = client.name
+		client.name = name
+		client.send("> Nickname changed to " + name)
+		chnl = self.get_user_channel(client)
+
+		#notify users in channel of new name
+		if chnl != None:
+			for c in chnl.clients.values():
+				if c is not client:
+					c.send(Const.CHANGED_NAME.format(oldName, client.name))
+
 
 	def away(self, client, message):
 		client.set_away(True, message)
