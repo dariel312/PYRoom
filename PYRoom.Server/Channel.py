@@ -1,4 +1,4 @@
-
+from Const import Const
 
 class Channel:
 	def __init__(self, name):
@@ -12,12 +12,12 @@ class Channel:
 	def welcome_client(self, client):
 		for c in self.clients.values():
 			if c.name is client.name:
-				chatMessage = '\n> {0} have joined the channel {1}!\n'.format("You", self.name)
-				c.send(chatMessage)
+				chatMessage = '\n> {0} have joined the channel {1}!'.format("You", self.name)
+				c.send(chatMessage + "\n" + Const.CHANNEL_USER_COUNT.format(len(self.clients)))
 			else:
-				chatMessage = '\n> {0} has joined the channel {1}!\n'.format(client.name, self.name)
+				chatMessage = '\n> {0} has joined the channel {1}!'.format(client.name, self.name)
 				c.send(chatMessage)
-				
+
 	#sends a message to all users in channel as a user
 	def broadcast_message(self, message, senderClient = None):
 		for client in self.clients.values():
@@ -26,7 +26,7 @@ class Channel:
 			else:
 				client.send('You: ' + message)
 
-	def remove_client_from_channel(self, clientName):
-		del self.clients[clientName]
-		leave_message = "\n" + clientName + " has left the channel " + self.name + "\n"
+	def remove_client(self, client):
+		del self.clients[client.name]
+		leave_message = "\n>" + client.name + " has left the channel " + self.name
 		self.broadcast_message(leave_message)

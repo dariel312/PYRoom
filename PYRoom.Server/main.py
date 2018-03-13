@@ -7,7 +7,12 @@ from ChatClient import *
 from Channel import *
 
 class Server:
-	SERVER_CONFIG = {"MAX_CONNECTIONS": 15}
+	SERVER_CONFIG = {
+		"MAX_CONNECTIONS": 15,
+		"SERVER_NAME": "Dariel's Chat",
+		"VERSION": "1.0"
+	}
+	BANNER = ""
 
 	def __init__(self, host=socket.gethostbyname('localhost'), port=50000, allowReuseAddress=True):
 		self.host = host
@@ -16,6 +21,8 @@ class Server:
 		self.clients = {}
 		self.clientThreadList = []
 		self.channels = {} # Channel Name -> Channel
+
+		self.BANNER = open("banner.txt").read()
 
 		try:
 			self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -56,14 +63,18 @@ class Server:
 		listenerThread.join()
 
 	def client_thread(self, clientSocket, clientAddress, size=4096):
+		
 		#send greeting get name
-		clientSocket.send("> Welcome to our chat app!!! What is your name?\n".encode('utf8'))
+		clientSocket.send(self.BANNER.encode('utf8'))
+		clientSocket.send(Const.WELCOME_INITIAL.encode('utf8'))
 		clientName = clientSocket.recv(size).decode('utf8')
 
 		#add user to list
 		client = ChatClient(clientSocket, clientName)
 		self.clients[clientName] = client
+		self.send_server_name(client)
 
+	
 		#send welcome message
 		welcomeMessage = Const.WELCOME_MESSAGE % clientName
 		client.send(welcomeMessage)
@@ -75,16 +86,20 @@ class Server:
 			op = params[0].lower()
 
 			if op == '/quit':
-				self.quit(clientSocket, clientAddress, name)
+				self.quit(client)
 				break
 			elif op == '/list':
-				self.list_all_users(client)
+				self.list_all_channels(client)
 			elif op == '/ping':
-				self.ping(client, params[1:])
+				self.ping(client, " ".join(params[1:]))
 			elif chatMessage == '/help':
 				self.help(client)
 			elif '/join' in chatMessage:
 				self.join(client, chatMessage)
+			elif op == '/version':
+				self.version(client)
+			elif op == '/away':
+				self.away(client)
 			else:
 				self.send_message(client, chatMessage)
 
@@ -98,6 +113,9 @@ class Server:
 			if client.name in chnl.clients: #returns first occurence of user in channel
 				return chnl
 		return None
+
+	def send_server_name(self, client):
+		client.send("/servername " + self.SERVER_CONFIG["SERVER_NAME"])
 
 	#handlers
 	def send_message(self, client, chatMessage):
@@ -129,15 +147,41 @@ class Server:
 		if usrChnl == targetChnl:
 			client.send(Const.ALREADY_IN_CHANNEL + channelName)
 		else:
+			if usrChnl != None: #removes him from old channel
+				usrChnl.remove_client(client)
 			targetChnl.add_client(client)
 
+	def version(self, client):
+		client.send("\n> Version: " + self.SERVER_CONFIG["VERSION"])
 
-	def quit(self, clientSocket, clientAddress, name=''):
-		clientSocket.send('/quit'.encode('utf8'))
-		clientSocket.close()
-		del self.clients[clientSocket]
-		self.broadcast_message(('\n> %s has left the chat room.\n' % name))
-		print("Connection with IP address {0} has been removed.\n".format(clientAddress[0]))
+	def away(self, client, message):
+		client.set_away(True, message)
+
+	def info(self, client):
+		client.send(Const.INFO)
+
+	def quit(self, client):
+		#remove from channel
+		channel = self.get_user_channel(client)
+		if channel != None:
+			channel.remove_client(client)
+
+		#disconnect
+		client.send(Const.DISCONNECTED)
+		client.send('/quit')
+		print("Connection with IP address {0} has been removed.\n".format(client.socket.getsockname()))
+		client.close()
+		del self.clients[client.name]
+
+	def list_all_channels(self, client):
+		channelsNames = [chnl.name + " ({0})".format(len(chnl.clients)) for chnl in self.channels.values()]
+
+		if len(channelsNames) == 0:
+			msg = Const.NO_CHANNELS
+		else:
+			msg = Const.LIST_ALL_CHANNELS + ", ".join(channelsNames) + "\n"
+
+		client.send(msg)
 
 	def list_all_users(self, client, name=''):
 		message = Const.LIST_ALL_USERS
@@ -145,8 +189,8 @@ class Server:
 		message = message + ", ".join(users_list) + "\n"
 		client.send(message)
 
-	def ping(self, client, messageParams):
-		client.send(''.join(messageParams))
+	def ping(self, client, message):
+		client.send("> PONG " + message)
 
 	def help(self, client):
 		client.send(Const.HELP_MESSAGE)

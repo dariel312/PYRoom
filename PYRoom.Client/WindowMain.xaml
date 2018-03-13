@@ -1,7 +1,7 @@
 <Window 
        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-       Title="PYRoom" Height="464" Width="738">
+       Title="PYRoom" Height="500" Width="900">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -19,18 +19,29 @@
         <Grid Name="main" VerticalAlignment="Stretch" Margin="0,0,0,0" Grid.Column="1" >
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="13*" />
                     <ColumnDefinition Width="80"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="50"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="100"/>
                 </Grid.RowDefinitions>
-                <!--<Button HorizontalAlignment="Left" FontWeight="SemiBold" Grid.Row="1" Background="#00000000" BorderBrush="#00000000" Foreground="#FFD12222" FontSize="14">X</Button>-->
-                <TextBox Margin="10,10,10,10" TextWrapping="Wrap" AcceptsReturn="true" Grid.ColumnSpan="2" Grid.Row="1" Name="messages" VerticalScrollBarVisibility="Visible" IsReadOnly="True"/>
-                <TextBox Margin="10,10,0,10" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.ColumnSpan="1" Grid.Row="2"  Name="myMessage" VerticalScrollBarVisibility="Visible"/>
-                <Button Margin="10,0,10,10" VerticalAlignment="Bottom" Height="30"  Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" Background="#FF118EF5" BorderBrush="#00000000" Foreground="#FFFFFBFB" Click="Send_Click">Send</Button>
+                <Rectangle Fill="#FF118EF5" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"  Height="4" Margin="10,0,10,0" Grid.ColumnSpan="2" />
+                <Label Margin="10,0,0,0" FontFamily="Segoe UI Light" FontSize="28 " Name="serverName">PyRoom</Label>
+                <Button Grid.Column="1" Content="&#8942;"  HorizontalAlignment="Right" Margin="0,0, 10,0" Width="30" Height="30" Background="#FFFFFFFF" FontSize="18" BorderThickness="0" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Click="Menu_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Connect" />
+                            <Separator />
+                            <MenuItem Header="Exit" Click="Menu_Exit_Click" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+
+                <TextBox Margin="10,10,10,10" TextWrapping="Wrap" AcceptsReturn="true" Grid.ColumnSpan="3" Grid.Row="1" Name="messages" VerticalScrollBarVisibility="Visible" IsReadOnly="True" FontFamily="Segoe UI Semilight"/>
+                <TextBox Margin="10,10,0,10" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.ColumnSpan="1" Grid.Row="2"  Name="myMessage" VerticalScrollBarVisibility="Visible" KeyDown="MyMessage_KeyDown" FontFamily="Segoe UI Semilight"></TextBox>
+                <Button Margin="10,0,10,10" VerticalAlignment="Bottom" Height="30"  Grid.Column="2" Grid.Row="2" HorizontalAlignment="Stretch" Background="#FF118EF5" BorderBrush="#00000000" Foreground="#FFFFFBFB" Click="Send_Click">Send</Button>
             </Grid>
             <Button Width="32" Height="32" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Left" Background="White" Click="SideBar_ToggleClick">&gt;</Button>
         </Grid>

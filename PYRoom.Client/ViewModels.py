@@ -12,7 +12,8 @@ class ChatRoomListItemVM():
         self.roomID = 0
 
 class AppVM():
-    def __init__(self):
-        self.messages = ''
-        self.myMessages = ''
-        self.chatRoomList = [ChatRoomListItemVM(), ChatRoomListItemVM(), ChatRoomListItemVM(), ChatRoomListItemVM(), ChatRoomListItemVM()]
+	def __init__(self):
+		self.messages = ''
+		self.myMessages = ''
+		self.serverName = 'PyRoom'
+		self.chatRoomList = [ChatRoomListItemVM(), ChatRoomListItemVM(), ChatRoomListItemVM(), ChatRoomListItemVM(), ChatRoomListItemVM()]
