@@ -71,46 +71,60 @@ class Server:
 		client = ChatClient(clientSocket, uuid.uuid4())
 		self.clients[client.uid] = client
 	
-		#send greeting get name
+		#send greeting 
 		client.send(self.BANNER)
 		client.send(Const.WELCOME_INITIAL)
+		client.send(Const.WELCOME_MESSAGE % client.name)
 		self.send_server_name(client) #sets the client the server name (Meta)
-
-		#send welcome message
-		welcomeMessage = Const.WELCOME_MESSAGE % client.name
-		client.send(welcomeMessage)
 
 		#handler loop
 		while True:
-			chatMessage = client.receive()
-			params = chatMessage.split(' ')
-			op = params[0].lower()
-
-			if op == '/quit':
-				self.quit(client)
+			try:
+				chatMessage = client.receive()
+			except:
+				print("Error recieving from socket, client {0}. Client likely disconnected.".format(client.name))
 				break
-			elif op == '/list':
-				self.list_all_channels(client)
-			elif op == '/ping':
-				self.ping(client, " ".join(params[1:]))
-			elif op == '/nick':
-				self.nick(client, params)
-			elif op == '/help':
-				self.help(client)
-			elif op == '/join':
-				self.join(client, chatMessage)
-			elif op == '/version':
-				self.version(client)
 
-			elif op == '/away':
-				self.away(client)
-			else:
-				self.send_message(client, chatMessage)
+			commands = filter(None, chatMessage.split("\r\n"))
+			
+			#could be multiple commands in one receive
+			for command in commands:
+				params = command.split(' ')
+				op = params[0].lower()
+				if op == '/quit':
+					self.quit(client)
+					break
+				elif op == '/list':
+					self.list_all_channels(client)
+				elif op == '/info':
+					self.info(client)
+				elif op == '/ping':
+					self.ping(client, " ".join(params[1:]))
+				elif op == '/nick':
+					self.nick(client, params)
+				elif op == '/help':
+					self.help(client)
+				elif op == '/join':
+					self.join(client, chatMessage)
+				elif op == '/version':
+					self.version(client)
+				elif op == '/privmsg':
+					self.private_message(client, params)
+				elif op == '/away':
+					self.away(client, params)
+				else:
+					self.send_message(client, chatMessage)
 
 	def server_shutdown(self):
 		print("Shutting down chat server.\n")
 		self.serverSocket.shutdown(socket.SHUT_RDWR)
 		self.serverSocket.close()
+
+	def get_user_with_name(self, name):
+		for client in self.clients.values():
+			if client.name == name:
+				return client
+		return None
 
 	def get_user_channel(self, client):
 		for chnl in self.channels.values():
@@ -145,6 +159,28 @@ class Server:
 		else:
 			client.send(Const.NOT_CHANNEL_MESSAGE)
 
+	def private_message(self, client, msgParams):
+
+		if len(msgParams) < 3: #error checks
+			self.help(client)
+			return
+
+		targetName = msgParams[1]
+		msg = msgParams[2:]
+
+		target = self.get_user_with_name(targetName)
+		
+		if target is None: #target not found
+			client.send(Const.MSG_USER_NOT_FOUND.format(targetName))
+			return
+
+		client.send("You PRIVMSG {0}: {1}".format(targetName, ' '.join(msg)))
+		target.send("{0} PRIVMSG You: {1}".format(client.name, ' '.join(msg)))
+
+		if target.isAway:
+			client.send("> {0} is away with message: {1}".format(target.name, target.awayMessage))
+
+
 	def join(self, client, chatMessage):
 		isInSameRoom = False
 
@@ -171,7 +207,7 @@ class Server:
 			targetChnl.add_client(client)
 
 	def version(self, client):
-		client.send("\n> Version: " + self.SERVER_CONFIG["VERSION"])
+		client.send(Const.SERVER_VERSION.format(self.SERVER_CONFIG["VERSION"]))
 
 	def nick(self, client, params):
 		users = self.load_users()
@@ -198,8 +234,15 @@ class Server:
 					c.send(Const.CHANGED_NAME.format(oldName, client.name))
 
 
-	def away(self, client, message):
-		client.set_away(True, message)
+	def away(self, client, params):
+		if len(params) is 1:
+			client.set_away(False)
+			client.send("> You are not AWAY.")
+		else:
+			message = " ".join(params[1:])
+			client.set_away(True, message)
+			client.send("> You are AWAY.")
+
 
 	def info(self, client):
 		client.send(Const.INFO)
@@ -215,7 +258,7 @@ class Server:
 		client.send('/quit')
 		print("Connection with IP address {0} has been removed.\n".format(client.socket.getsockname()))
 		client.close()
-		del self.clients[client.name]
+		del self.clients[client.uid]
 
 	def list_all_channels(self, client):
 		channelsNames = [chnl.name + " ({0})".format(len(chnl.clients)) for chnl in self.channels.values()]

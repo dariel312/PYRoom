@@ -13,7 +13,7 @@ class ChatClient(object):
 		self.awayMessage = message
 
 	def send(self, message):
-		self.socket.send((message + "\n").encode('utf8'))
+		self.socket.send((message + "\r\n").encode('utf8'))
 
 	def receive(self, size=4096):
 		return self.socket.recv(size).decode('utf8')

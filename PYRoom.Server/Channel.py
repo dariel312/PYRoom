@@ -27,6 +27,6 @@ class Channel:
 				client.send('You: ' + message)
 
 	def remove_client(self, client):
-		del self.clients[client.name]
+		del self.clients[client.uid]
 		leave_message = "\n>" + client.name + " has left the channel " + self.name
 		self.broadcast_message(leave_message)

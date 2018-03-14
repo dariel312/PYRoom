@@ -74,7 +74,7 @@ class WindowMain(Window):
 
 	#sends message to server
 	def send_message(self, message):
-		self.client.send(message)
+		self.client.send(message + "\r\n")
 
 	def connect(self, params):
 		self.client = Client()
@@ -95,17 +95,14 @@ class WindowMain(Window):
 		while True:
 			#get data from socket
 			data = self.client.receive()
-			commands = filter(None, data.split("\n"))
+			commands =  filter(None, data.split("\r\n"))
 
-			#delimit by \n, otherwise multiple commands may come in one \n
 			for command in commands:
 				#handle commands from serv
 				params = command.split(' ')
 				op = params[0]
 				if op == '/servername':
 					self.recv_server_name(" ".join(params[1:]))
-				#elif op == '/quit':
-				#	self.client.disconnect()
 				else:
 					self.model.messages += command + "\n"
 					self.isNewMessage = True
