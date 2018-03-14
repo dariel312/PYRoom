@@ -7,6 +7,7 @@ class ChatClient(object):
 		self.isAway = False
 		self.awayMessage = ""
 		self.isLoggedIn = False
+		self.closed = False
 
 	def set_away(self, isAway, message = ''):
 		self.isAway = isAway
@@ -19,4 +20,5 @@ class ChatClient(object):
 		return self.socket.recv(size).decode('utf8')
 
 	def close(self):
+		self.closed = True
 		self.socket.close()

@@ -78,7 +78,7 @@ class Server:
 		self.send_server_name(client) #sets the client the server name (Meta)
 
 		#handler loop
-		while True:
+		while not client.closed:
 			try:
 				chatMessage = client.receive()
 			except:
@@ -112,6 +112,10 @@ class Server:
 					self.private_message(client, params)
 				elif op == '/away':
 					self.away(client, params)
+				elif op == '/kick':
+					self.kick(client, params)
+				elif op == '/ison':
+					self.ison(client, params)
 				else:
 					self.send_message(client, chatMessage)
 
@@ -206,8 +210,27 @@ class Server:
 				usrChnl.remove_client(client)
 			targetChnl.add_client(client)
 
+	def kick(self, client, params):
+
+		#return if user not admin\op
+
+		
+		pass
+
+
 	def version(self, client):
 		client.send(Const.SERVER_VERSION.format(self.SERVER_CONFIG["VERSION"]))
+
+	def ison(self, client, params):
+		users = []
+
+		#get users
+		for name in params[1:]:
+			user = self.get_user_with_name(name)
+			if user is not None:
+				users.append(user.name)
+
+		client.send(Const.IS_ON.format(" ".join(users)))
 
 	def nick(self, client, params):
 		users = self.load_users()
@@ -255,7 +278,7 @@ class Server:
 
 		#disconnect
 		client.send(Const.DISCONNECTED)
-		client.send('/quit')
+		#client.send('/quit')
 		print("Connection with IP address {0} has been removed.\n".format(client.socket.getsockname()))
 		client.close()
 		del self.clients[client.uid]
@@ -266,7 +289,7 @@ class Server:
 		if len(channelsNames) == 0:
 			msg = Const.NO_CHANNELS
 		else:
-			msg = Const.LIST_ALL_CHANNELS + ", ".join(channelsNames) + "\n"
+			msg = Const.LIST_ALL_CHANNELS + ", ".join(channelsNames)
 
 		client.send(msg)
 

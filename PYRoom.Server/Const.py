@@ -15,6 +15,7 @@ class Const:
 	USER_TAKEN = "> This name is already registered. Please use a different nickname or log in using command /USER <username> <password>"
 	CHANGED_NAME = "> {0} has changed nickname to {1}"
 	MSG_USER_NOT_FOUND = "> {0} can not be found on this server."
+	IS_ON = "> Is On: {0}"
 	HELP_MESSAGE = """
 > The list of commands available are:
 /help                   - Show the instructions

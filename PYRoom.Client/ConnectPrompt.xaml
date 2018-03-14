@@ -1,0 +1,21 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Connect" 
+        SizeToContent="WidthAndHeight" 
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="80"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+
+        </Grid.RowDefinitions>
+        <Label>Server IP</Label>
+        <TextBox HorizontalAlignment="Left" Height="24" Margin="10,26,5,0" TextWrapping="Wrap" Name="host" VerticalAlignment="Top" Width="230" Text="127.0.0.1"/>
+        <Label Grid.Column="1">Port</Label>
+        <TextBox HorizontalAlignment="Left" Height="24" Margin="10,26,0,0" TextWrapping="Wrap" Name="port" Grid.Column="1" VerticalAlignment="Top" Width="60" Text="50000"/>
+        <Button Content="Connect" HorizontalAlignment="Center" Margin="0,60,0,10" VerticalAlignment="Top" Width="90" Height="28" Click="Click_Submit"  Grid.ColumnSpan="2" IsCancel="true"/>
+    </Grid>
+</Window>

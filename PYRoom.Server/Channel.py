@@ -12,21 +12,25 @@ class Channel:
 	def welcome_client(self, client):
 		for c in self.clients.values():
 			if c.name is client.name:
-				chatMessage = '\n> {0} have joined the channel {1}!'.format("You", self.name)
+				chatMessage = '> {0} have joined the channel {1}!'.format("You", self.name)
 				c.send(chatMessage + "\n" + Const.CHANNEL_USER_COUNT.format(len(self.clients)))
 			else:
-				chatMessage = '\n> {0} has joined the channel {1}!'.format(client.name, self.name)
+				chatMessage = '> {0} has joined the channel {1}!'.format(client.name, self.name)
 				c.send(chatMessage)
 
 	#sends a message to all users in channel as a user
-	def broadcast_message(self, message, senderClient = None):
+	def broadcast_message(self, message, senderClient):
 		for client in self.clients.values():
-			if senderClient == None or client.name != senderClient.name:
+			if client.name != senderClient.name:
 				client.send(senderClient.name + ": " + message)
 			else:
 				client.send('You: ' + message)
 
+	def send_to_all(self, message):
+		for client in self.clients.values():
+			client.send(message)
+
 	def remove_client(self, client):
 		del self.clients[client.uid]
-		leave_message = "\n>" + client.name + " has left the channel " + self.name
-		self.broadcast_message(leave_message)
+		leave_message = ">" + client.name + " has left the channel " + self.name
+		self.send_to_all(leave_message)
