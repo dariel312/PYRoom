@@ -6,7 +6,6 @@ def main():
     print("Waiting for connections...\n")
 
     chatServer.start_listening()
-    chatServer.server_shutdown()
 
 if __name__ == "__main__":
     main()

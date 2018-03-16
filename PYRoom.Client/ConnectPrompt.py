@@ -16,6 +16,6 @@ class ConnectPrompt(Window):
 		return self.name
 	
 	def Click_Submit(self, sender, e):
-		self.host = self.ui.host.Text
-		self.port = self.ui.port.Text
+		self.host = self.ui.input_host.Text
+		self.port = self.ui.input_port.Text
 		self.result = True

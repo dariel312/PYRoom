@@ -84,7 +84,7 @@ class WindowMain(Window):
 		
 
 	def Menu_Exit_Click(self, sender, e):
-		self.cose()
+		self.close()
 	
 	#CLIENT STUFF
 	def close(self): 

@@ -3,6 +3,7 @@ import socket
 import sys
 import threading
 import uuid
+import datetime
 from Const import *
 from ChatClient import *
 from Channel import *
@@ -17,13 +18,14 @@ class ChatServer:
 	}
 	BANNER = ""
 
-	def __init__(self, host=socket.gethostbyname('localhost'), port=50000, allowReuseAddress=True):
+	def __init__(self, host=socket.gethostbyname('localhost'), port=50000, allowReuseAddress=True, config={}):
 		self.host = host
 		self.port = port
 		self.address = (self.host, self.port)
 		self.clients = {}
 		self.clientThreadList = []
 		self.channels = {} # Channel Name -> Channel
+		self.stopLisening = False
 
 		self.BANNER = open("banner.txt").read()
 
@@ -44,9 +46,12 @@ class ChatServer:
 
 	def listen_thread(self):
 		#listener loop
-		while True:
+		while not self.stopLisening:
 			print("Waiting for a client to establish a connection\n")
-			clientSocket, clientAddress = self.serverSocket.accept()
+			try:
+				clientSocket, clientAddress = self.serverSocket.accept()
+			except:
+				break
 			print("Connection established with IP address {0} and port {1}\n".format(clientAddress[0], clientAddress[1]))
 					
 			clientThread = threading.Thread(target=self.client_thread, args=(clientSocket, clientAddress))
@@ -61,9 +66,10 @@ class ChatServer:
 
 	def start_listening(self):
 		self.serverSocket.listen(ChatServer.SERVER_CONFIG["MAX_CONNECTIONS"])
-		listenerThread = threading.Thread(target=self.listen_thread)
-		listenerThread.start()
-		listenerThread.join()
+		self.listenerThread = threading.Thread(target=self.listen_thread)
+		self.listenerThread.start()
+		self.stopLisening = False
+		self.listenerThread.join()
 
 	def client_thread(self, clientSocket, clientAddress, size=4096):
 	
@@ -71,10 +77,11 @@ class ChatServer:
 		client = ChatClient(clientSocket, uuid.uuid4())
 		self.clients[client.uid] = client
 	
-		#send greeting 
+		#send greeting
 		client.send(self.BANNER)
 		client.send(Const.WELCOME_INITIAL)
 		client.send(Const.WELCOME_MESSAGE % client.name)
+		client.send(Const.RULES)
 		self.send_server_name(client) #sets the client the server name (Meta)
 
 		#handler loop
@@ -123,19 +130,38 @@ class ChatServer:
 					self.private_message(client, params, useAutoReply = False)
 				elif op == '/away':
 					self.away(client, params)
-				elif op == '/kick':
+				elif op == '/kick': #FINISH
 					self.kick(client, params)
 				elif op == '/ison':
 					self.ison(client, params)
-				elif op == '/register':
-					self.register(client, params)
+				elif op == '/rules':
+					self.rules(client)
+				elif op == '/die': #FIX
+					self.die(client) 
+				elif op == '/oper': #FINISH
+					self.oper(client, params)
+				elif op == '/time':
+					self.time(client)
+				elif op == '/whois':
+					self.whois(client, params)
+				elif op == '/setname':
+					self.set_name(client, params)
+				elif op == '/silence':
+					self.silence(client, params)
 				else:
 					self.send_message(client, chatMessage)
 
 	def server_shutdown(self):
 		print("Shutting down chat server.\n")
-		self.serverSocket.shutdown(socket.SHUT_RDWR)
+
+		self.stopLisening = True 
+		for client in self.clients.values():
+			client.send(Const.SHUTTING_DOWN)
+			client.socket.close()
+
+		#self.serverSocket.shutdown(socket.SHUT_RDWR)
 		self.serverSocket.close()
+		
 
 	def get_user_with_name(self, name):
 		for client in self.clients.values():
@@ -167,11 +193,23 @@ class ChatServer:
 			users.append(usr)
 		return users
 
+	def login_user(self, username, password):
+		users = self.load_users()
+		for user in users:
+			if user.name == username and user.password == password:
+				return user
+		return None
+
+
 	#handlers
 	def send_message(self, client, chatMessage):
 		usrChnl = self.get_user_channel(client)
 
-		if usrChnl != None: #if user is in channel broadcast
+		if client.isSilenced:
+			client.send("> You are silenced.")
+			return
+
+		if usrChnl is not None: #if user is in channel broadcast
 			usrChnl.broadcast_message(chatMessage, client)
 		else:
 			client.send(Const.NOT_CHANNEL_MESSAGE)
@@ -181,14 +219,49 @@ class ChatServer:
 			user = self.get_user_with_name(username)
 			client.send("> {0}: {1}".format(user.name, user.socket.getsockname()))
 
-	def register(self, client, params):
-		if len(params) is not 2:
-			client.send(help)
+	def rules(self, client):
+		client.send(Const.RULES)
+
+	def oper(self, client, params):
+		if len(params) is not 3:
+			self.help(client)
+			return
+	
+		username = params[1]
+		password = params[2]
+
+		users = self.load_users()
+		user = self.login_user(username, password)
+
+		if user is not None and (user.role == 'sysop' or user.role=='admin'):
+			client.isOperator = True
+			client.isLoggedIn = True
+			client.username = user.name
+			client.role = user.role
+			client.send("> Logged in successfully.")
+		else:
+			client.send("> Invalid username or password.")
+
+	def silence(self, client, params):
+		if not client.isOperator:
+			client.send(Const.MUST_BE_OP)
+			return
+		
+		for c in self.clients.values():
+			c.isSilenced = not c.isSilenced
+
+		client.send("")
+
+	def set_name(self, client, params):
+		if len(params) < 2:
+			self.help(client)
 			return
 
+		name = " ".join(params[1:])
+		client.realName = name
+		client.send(Const.SETNAME_SUCCESS.format(name))
 
 	def users(self, client):
-
 		for user in self.clients.values():
 			channel = self.get_user_channel(user)
 
@@ -196,9 +269,22 @@ class ChatServer:
 				cName = channel.name
 			else:
 				cName = "None"
-			client.send("> Name: {0}\tChannel:{1}".format(user.name, cName))
 
-	def private_message(self, client, msgParams, useAutoReply = True):
+			client.send("> Nick: {0}\tChannel:{1}".format(user.name, cName))
+
+	def whois(self, client, params):
+		for name in params[1:]:
+			tUser = self.get_user_with_name(name)
+			channel = self.get_user_channel(tUser)
+
+			if channel is not None:
+				cName = channel.name
+			else:
+				cName = "None"
+
+			client.send(Const.WHO_IS.format(tUser.name, tUser.realName, tUser.isAway, tUser.isLoggedIn, cName))
+
+	def private_message(self, client, msgParams, useAutoReply=True):
 
 		if len(msgParams) < 3: #error checks
 			self.help(client)
@@ -218,6 +304,13 @@ class ChatServer:
 
 		if target.isAway and useAutoReply:
 			client.send("> {0} is away with message: {1}".format(target.name, target.awayMessage))
+	
+	def die(self, client):
+		if client.isOperator is False:
+			client.send(Const.MUST_BE_OP)
+			return
+		
+		self.server_shutdown()
 
 	def invite(self, client, params):
 		if len(params) is not 3:
@@ -274,9 +367,11 @@ class ChatServer:
 			targetChnl.add_client(client)
 
 	def kick(self, client, params):
-
-		#return if user not admin\op
-
+		if not client.isOperator:
+			client.send(Const.MUST_BE_OP)
+			return
+		
+		
 		
 		pass
 
@@ -333,6 +428,9 @@ class ChatServer:
 	def info(self, client):
 		client.send(Const.INFO)
 
+	def time(self, client):
+		dt = datetime.datetime.now()
+		client.send("> Time:" + dt.strftime('%Y-%m-%d %H:%M:%S'))
 	def quit(self, client):
 		#remove from channel
 		channel = self.get_user_channel(client)
