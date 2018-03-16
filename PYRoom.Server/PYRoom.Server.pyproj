@@ -27,7 +27,9 @@
     <Compile Include="ChatClient.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ChatServer2.py" />
+    <Compile Include="ChatServer.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Const.py">
       <SubType>Code</SubType>
     </Compile>

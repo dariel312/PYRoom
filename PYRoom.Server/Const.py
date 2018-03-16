@@ -29,5 +29,10 @@ class Const:
 /away <message>			- Sets yourself as away, private messages will elicit an automatic reply with <message>. Message is optional
 /pass <password>		- Sends password in an attempt to register connected. /pass must be proceded with /user
 /user <username> <hostname> <servername> <realname> -Logs you in as a to a registered user.
-/privmsg <user> <message> - Sends a direct message to the specified user."""
+/privmsg <user> <message> - Sends a direct message to the specified user.
+/notice  <user> <message> - Same as privmsg but does not return an automatic reply from away users.
+/users					- Returns a list of users connected to the server
+/userhost <users>		-Returns the host for the specified users
+/userip <users>			-Returns the IP of the specified users.
+"""
 	

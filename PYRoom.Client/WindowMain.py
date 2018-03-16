@@ -70,7 +70,7 @@ class WindowMain(Window):
 			MessageBox.Show("You canceled this new room.") 
 
 	def Send_Click(self, sender, e):
-		self.submit_message()
+		self.submit_message(self.ui.myMessage)
 
 	def Menu_Click(self, sender, e):
 		sender.ContextMenu.IsOpen = True
