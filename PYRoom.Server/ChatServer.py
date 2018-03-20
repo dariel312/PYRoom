@@ -69,7 +69,6 @@ class ChatServer:
 		self.listenerThread = threading.Thread(target=self.listen_thread)
 		self.listenerThread.start()
 		self.stopLisening = False
-		self.listenerThread.join()
 
 	def client_thread(self, clientSocket, clientAddress, size=4096):
 	
@@ -138,6 +137,8 @@ class ChatServer:
 					self.rules(client)
 				elif op == '/die': #FIX
 					self.die(client) 
+				elif op == '/restart':
+					self.restart(client)
 				elif op == '/oper': #FINISH
 					self.oper(client, params)
 				elif op == '/time':
@@ -151,6 +152,9 @@ class ChatServer:
 				else:
 					self.send_message(client, chatMessage)
 
+	def set_restart_callback(callback):
+		pass
+
 	def server_shutdown(self):
 		print("Shutting down chat server.\n")
 
@@ -159,9 +163,10 @@ class ChatServer:
 			client.send(Const.SHUTTING_DOWN)
 			client.socket.close()
 
-		#self.serverSocket.shutdown(socket.SHUT_RDWR)
 		self.serverSocket.close()
 		
+	def load_config(self):
+		pass
 
 	def get_user_with_name(self, name):
 		for client in self.clients.values():
@@ -312,6 +317,14 @@ class ChatServer:
 		
 		self.server_shutdown()
 
+	def restart(self):
+		if client.isOperator is False:
+			client.send(Const.MUST_BE_OP)
+			return
+		
+		self.server_shutdown()
+		self.restartCallBack()
+
 	def invite(self, client, params):
 		if len(params) is not 3:
 			self.help(client)
@@ -370,8 +383,6 @@ class ChatServer:
 		if not client.isOperator:
 			client.send(Const.MUST_BE_OP)
 			return
-		
-		
 		
 		pass
 
