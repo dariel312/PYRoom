@@ -119,6 +119,8 @@ class ChatServer:
 					self.user_host(client, params)
 				elif op == '/users':
 					self.users(client)
+				elif op == '/user':
+					self.user(client)
 				elif op == '/join':
 					self.join(client, chatMessage)
 				elif op == '/version':
@@ -325,6 +327,14 @@ class ChatServer:
 		self.server_shutdown()
 		self.restartCallBack()
 
+
+	def user(self, client, params):
+		if len(params) != 2:
+			self.help(client)
+		
+		client.username = params[1]
+
+
 	def invite(self, client, params):
 		if len(params) is not 3:
 			self.help(client)
@@ -380,12 +390,24 @@ class ChatServer:
 			targetChnl.add_client(client)
 
 	def kick(self, client, params):
-		if not client.isOperator:
-			client.send(Const.MUST_BE_OP)
-			return
+		#if not client.isOperator:
+		#	client.send(Const.MUST_BE_OP)
+		#	return
 		
-		pass
+		if len(params) is not 3:
+			self.help(client)
+			return
 
+		trget = self.get_user_with_name(params[2])
+		usrChnl = self.get_user_channel(trget)
+		trgChnl = self.channels.get(params[1])
+		
+		if usrChnl is None or usrChnl != trgChnl:
+			client.send("> User not in that channel.")
+			return
+
+		trgChnl.remove_client(client)
+		client.send("> You have been kicked from the channel.")
 
 	def version(self, client):
 		client.send(Const.SERVER_VERSION.format(self.SERVER_CONFIG["VERSION"]))
