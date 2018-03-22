@@ -3,6 +3,7 @@ import socket
 import sys
 import threading
 import uuid
+import json
 import datetime
 from Const import *
 from ChatClient import *
@@ -14,13 +15,20 @@ class ChatServer:
 		"MAX_CONNECTIONS": 15,
 		"SERVER_NAME": "Dariel's Chat",
 		"VERSION": "1.0",
-		"DB_PATH": "./"
 	}
 	BANNER = ""
 
-	def __init__(self, host=socket.gethostbyname('localhost'), port=50000, allowReuseAddress=True, config={}):
+	def __init__(self, host=socket.gethostbyname('localhost'), port=50000, allowReuseAddress=True, dbPath = "./"):
 		self.host = host
+		
 		self.port = port
+		if self.port is None:
+			self.port = 50000
+		
+		self.dbPath = dbPath
+		if self.dbPath is None:
+			self.dbPath = "./"
+
 		self.address = (self.host, self.port)
 		self.clients = {}
 		self.clientThreadList = []
@@ -43,6 +51,10 @@ class ChatServer:
 		except socket.error as errorMessage:
 			sys.stderr.write('Failed to bind to ' + self.address + '. Error - %s\n', errorMessage[1])
 			raise
+
+	def load_channels(self):
+		file = open(self.dbPath + "/channels.json").read()
+		#self.channels = 
 
 	def listen_thread(self):
 		#listener loop
@@ -131,17 +143,19 @@ class ChatServer:
 					self.private_message(client, params, useAutoReply = False)
 				elif op == '/away':
 					self.away(client, params)
-				elif op == '/kick': #FINISH
+				elif op == '/kick':
 					self.kick(client, params)
+				elif op == '/topic':
+					self.topic(client, params)
 				elif op == '/ison':
 					self.ison(client, params)
 				elif op == '/rules':
 					self.rules(client)
-				elif op == '/die': #FIX
+				elif op == '/die':
 					self.die(client) 
 				elif op == '/restart':
 					self.restart(client)
-				elif op == '/oper': #FINISH
+				elif op == '/oper':
 					self.oper(client, params)
 				elif op == '/time':
 					self.time(client)
@@ -186,7 +200,7 @@ class ChatServer:
 		client.send("/servername " + self.SERVER_CONFIG["SERVER_NAME"])
 	
 	def load_users(self):
-		text = open(self.SERVER_CONFIG["DB_PATH"] + "users.txt").read()
+		text = open(self.dbPath + "users.txt").read()
 		users = []
 		for line in text.split("\n"):
 			if line == "": continue
@@ -388,11 +402,28 @@ class ChatServer:
 			if usrChnl != None: #removes him from old channel
 				usrChnl.remove_client(client)
 			targetChnl.add_client(client)
+	def topic(self, client, params):
+		if len(params) < 2:
+			self.help(client)
+			return
+
+		chnnl = self.channels.get(params[1])
+
+		if chnnl is None:
+			client.send("> Channel does not exist.")
+			return 
+
+		if len(params) > 2:#set topic
+			topic = ' '.join(parmas[2:])
+			chnnl.set_topic(topic)
+		else: #send topic
+			client.send("> Topic: " + chnnl.topic)
+
 
 	def kick(self, client, params):
-		#if not client.isOperator:
-		#	client.send(Const.MUST_BE_OP)
-		#	return
+		if not client.isoperator:
+			client.send(const.must_be_op)
+			return
 		
 		if len(params) is not 3:
 			self.help(client)

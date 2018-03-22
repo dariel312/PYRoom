@@ -3,7 +3,7 @@ class ChannelQueue():
 		self.op = operation
 		self.name = name
 
-class ChatRoomListItemVM():
+class ChannelVM():
     def __init__(self):
         self.name = "Johns Room"
         self.userCount = 10
@@ -14,5 +14,6 @@ class AppVM():
 		self.myMessages = ''
 		self.serverName = 'PyRoom'
 		self.isNewMessage = False
+		self.channels = {}
 		self.channelQueue = []
 		self.userQueue = []

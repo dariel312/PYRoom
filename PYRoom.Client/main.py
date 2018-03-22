@@ -6,12 +6,12 @@ import argparse
 
 
 if __name__ == '__main__':
-	#if len(sys.argv) > 0:
-	#	for x in range(0, len(sys.argv)):
-	#		if argv[x]  == '-h':
-	#			host = argv[x+1]
-	#		elif argv[x] == '-p':
-	#			port = argv[x+1]
+
+	#parser = argparse.ArgumentParser()
+	#parser.add_argument("-p", "--p", type=int, help="Port number to connect to by default")
+	#parser.add_argument("-h", "--host", type=str, help="Host IP to connect to by default")
+
+	#args = parser.parse_args()
 
 	Application().Run(WindowMain())
 

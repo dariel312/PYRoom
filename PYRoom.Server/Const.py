@@ -46,6 +46,7 @@ class Const:
 /die					-Shuts down the server, must be an operator.
 /silence <users>		-Silences specified users, must be an operator.
 /setname <name>			-Sets your real name. Spaces allowed
+/topic <channel> <topic> - Sets the topic of the channel. If topic is ommited, then will return the topic if the channel.
 """
 	
 	RULES = """

@@ -4,6 +4,7 @@ class Channel:
 	def __init__(self, name):
 		self.clients = {} # Client Name -> Socket
 		self.name = name
+		self.topic = ''
 
 	def add_client(self, client):
 		self.clients[client.uid] = client
@@ -34,3 +35,7 @@ class Channel:
 		del self.clients[client.uid]
 		leave_message = ">" + client.name + " has left the channel " + self.name
 		self.send_to_all(leave_message)
+
+	def set_topic(self, topic):
+		self.topic = topic
+		self.send_to_all("> Topic has been changed to: " + topic)

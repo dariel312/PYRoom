@@ -12,21 +12,11 @@
                 <RowDefinition Height ="Auto"/>
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Button Height="32" Margin="15,15,15,0" VerticalAlignment="Top" Background="White" Click="NewRoom_Click">New Room</Button>
             <!--<ListBox Margin="15,15,15,10" VerticalAlignment="Stretch" Grid.Row="1" Background="Transparent" BorderBrush="#FF7F7E86" Foreground="#FFD7D7D7">
                 
             </ListBox>-->
-            <TreeView Margin="15,15,15,10" VerticalAlignment="Stretch" Grid.Row="1" Background="White" BorderBrush="#FF7F7E86" Foreground="#FFD7D7D7" Name="channels">
-                <TreeViewItem Header="Dariel's Room">
-                    <TreeViewItem Header="Dariel"></TreeViewItem>
-                    <TreeViewItem Header="John"></TreeViewItem>
-                    <TreeViewItem Header="Noah"></TreeViewItem>
-                </TreeViewItem>
-                <TreeViewItem Header="Fun Room">
-                    <TreeViewItem Header="Jenna"></TreeViewItem>
-                    <TreeViewItem Header="Nick"></TreeViewItem>
-                </TreeViewItem>
-            </TreeView>
+            <ListView Margin="15,15,15,10" VerticalAlignment="Stretch" Grid.Row="1" Background="White" BorderBrush="#FF7F7E86" Foreground="#FFD7D7D7" Name="channels">
+            </ListView>
         </Grid>
         <Grid Name="main" VerticalAlignment="Stretch" Margin="0,0,0,0" Grid.Column="1" >
             <Grid>

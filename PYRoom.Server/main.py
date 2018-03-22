@@ -1,13 +1,21 @@
 from ChatServer import ChatServer
 
+import argparse
 
 def main():
 	global isRestart
 	isRestart = True
 
+	#get args
+	parser = argparse.ArgumentParser()
+	parser.add_argument("-p", "--p", type=int, help="Port number to listen connect to by default")
+	parser.add_argument("-db", "--db", type=str, help="Directory of stored db files.")
+	args = parser.parse_args()
+
+
 	while isRestart:
 		isRestart = False
-		chatServer = ChatServer()
+		chatServer = ChatServer(port=args.p, dbPath = args.db)
 		print("\nListening on port " + str(chatServer.port))
 		print("Waiting for connections...\n")
 		chatServer.start_listening()

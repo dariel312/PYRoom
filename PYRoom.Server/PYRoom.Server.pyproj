@@ -13,6 +13,8 @@
     <RootNamespace>PYRoom.Server</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <CommandLineArguments>
+    </CommandLineArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="banner.txt" />
+    <Content Include="channels.json" />
     <Content Include="chatclient.conf" />
     <Content Include="users.txt" />
   </ItemGroup>
