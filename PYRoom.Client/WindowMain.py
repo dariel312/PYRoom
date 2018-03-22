@@ -95,7 +95,9 @@ class WindowMain(Window):
 		
 	def channels_SelectionChanged(self, sender, e):
 		newName = sender.SelectedItem.Content
-		if newName!= self.model.currentChannel.name: #if user clisk diff channel change model chnl
+		if  self.model.currentChannel == None or newName!= self.model.currentChannel.name: #if user click diff channel change model chnl
+			if self.model.currentChannel.joined: #only sendif havent joined yet
+				self.send_message("/join " + newName)
 			self.model.currentChannel = self.model.channels.get(newName)
 		self.model.messages = self.model.currentChannel.messages
 
@@ -150,8 +152,8 @@ class WindowMain(Window):
 				if op == '/servername':
 					self.recv_server_name(" ".join(params[1:]))
 				elif op == '/joined':
-
 					self.model.currentChannel = self.model.channels.get(params[1])
+					self.model.currentChannel.joined = True
 				elif op == '/channel':
 					cOP = ChannelOP(params[1], params[2])
 
@@ -185,5 +187,3 @@ class WindowMain(Window):
 	#RECV HANDLERS
 	def recv_server_name(self, name):
 		self.model.serverName = name
-
-

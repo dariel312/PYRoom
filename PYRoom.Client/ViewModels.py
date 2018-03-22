@@ -5,11 +5,12 @@ class ChannelOP():
 		self.message = ""
 
 class ChannelVM():
-    def __init__(self, name, listbox):
-        self.name = name
-        self.listbox = listbox
-        self.messages = ''
-
+	def __init__(self, name, listbox):
+		self.name = name
+		self.listbox = listbox
+		self.messages = ''
+		self.joined = False
+		
 class AppVM():
 	def __init__(self):
 		self.messages = ''
