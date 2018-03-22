@@ -4,7 +4,6 @@ from System.Windows.Controls import *
 from System.Windows import *
 from System.Windows.Threading import *
 from System.Windows.Input import *
-from NewChatRoomPrompt import *
 from ConnectPrompt import *
 from ViewModels import *
 from Client import *
@@ -30,25 +29,45 @@ class WindowMain(Window):
 	def update_UI(self, sender, e):
 		"""updates ui for data changes"""
 
-		self.ui.messages.Text = self.model.messages
+		if self.model.currentChannel == None: #update messages b4 youre in channel
+			self.ui.messages.Text = self.model.messages
+		else:
+			self.ui.messages.Text = self.model.currentChannel.messages
+
 		self.ui.serverName.Content = self.model.serverName
 		self.ui.Title = self.model.serverName
 
+		#update message box
 		if self.model.isNewMessage:
 			self.messages.ScrollToEnd()
 			self.model.isNewMessage = False
-
+		
+		#uodate channel queue
 		for channelOP in self.model.channelQueue:
-			if channelOP.op is "add":
+			if channelOP.op == "add":
+				item = ListBoxItem()
+				item.Content = "{0}".format(channelOP.name)
+				self.ui.channels.Items.Add(item)
+				self.model.channels[channelOP.name].listbox = item
+			elif channelOP.op == "delete":
 				pass
-			elif channelOP.op is "delete":
-				pass
+			elif channelOP.op == "message":
+				self.model.channels[channelOP.name].messages += channelOP.message + '\n'
 
-		for userOP in self.model.userQueue:
-			if userOP.op is "add":
-				pass
-			elif userOP.op is "delete":
-				pass
+				if channelOP.name == self.model.currentChannel.name:
+					self.model.messages += channelOP.message + "\n"
+					self.model.isNewMessage = True
+
+			self.model.channelQueue.remove(channelOP)
+				
+		#update ui if we got a channel
+		if self.ui.channels.SelectedItem == None and self.model.currentChannel != None:
+			self.ui.channels.SelectedItem = self.model.currentChannel.listbox
+
+		#update UI if we changed channels
+		if self.model.currentChannel != None:
+			if self.model.currentChannel.name != self.ui.channels.SelectedItem.Content:
+				self.ui.channels.SelectedItem = self.model.currentChannel.listbox
 
 	#GUI STUFF
 	def MyMessage_KeyDown(self, sender, e):
@@ -60,14 +79,6 @@ class WindowMain(Window):
 			self.sidebar.Visibility = Visibility.Visible
 		else:
 			self.sidebar.Visibility = Visibility.Collapsed
-
-	def NewRoom_Click(self, sender, e):
-		prompt = NewChatRoomPrompt()
-		prompt.ShowDialog()
-		if prompt.result:
-			MessageBox.Show(self.newPrompt.getName())
-		else:
-			MessageBox.Show("You canceled this new room.") 
 
 	def Send_Click(self, sender, e):
 		self.submit_message(self.ui.myMessage)
@@ -82,6 +93,11 @@ class WindowMain(Window):
 		if prompt.result:
 			self.submit_message("/connect {0} {1}".format(prompt.host, prompt.port))
 		
+	def channels_SelectionChanged(self, sender, e):
+		newName = sender.SelectedItem.Content
+		if newName!= self.model.currentChannel.name: #if user clisk diff channel change model chnl
+			self.model.currentChannel = self.model.channels.get(newName)
+		self.model.messages = self.model.currentChannel.messages
 
 	def Menu_Exit_Click(self, sender, e):
 		self.close()
@@ -123,9 +139,9 @@ class WindowMain(Window):
 				data = self.client.receive()
 			except:
 				print("Fail silently: Socket disconnected")
-				break;
+				break
 
-			commands =  filter(None, data.split("\r\n"))
+			commands = filter(None, data.split("\r\n"))
 
 			for command in commands:
 				#handle commands from serv
@@ -133,13 +149,27 @@ class WindowMain(Window):
 				op = params[0]
 				if op == '/servername':
 					self.recv_server_name(" ".join(params[1:]))
+				elif op == '/joined':
+
+					self.model.currentChannel = self.model.channels.get(params[1])
 				elif op == '/channel':
-					self.model.channelQueue.append(ChannelQueue(params[1], params[2]))
+					cOP = ChannelOP(params[1], params[2])
+
+					if cOP.op == 'message': #message param only for when op = message
+						cOP.message = ' '.join(params[3:])
+					elif cOP.op == 'add':
+						self.model.channels[cOP.name] = ChannelVM(cOP.name, None)
+
+					self.model.channelQueue.append(cOP)
+
 				else:
-					self.model.messages += command + "\n"
+					if self.model.currentChannel == None: #add to base str
+						self.model.messages += command + "\n"
+					else: #now were in channel add to channel str
+						self.model.currentChannel.messages += command + "\n"
 					self.model.isNewMessage = True
 
-	#SEND handlers			
+	#SEND handlers
 	def connect(self, params):
 		if len(params) is not 3:
 			return
@@ -155,3 +185,5 @@ class WindowMain(Window):
 	#RECV HANDLERS
 	def recv_server_name(self, name):
 		self.model.serverName = name
+
+

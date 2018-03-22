@@ -4,7 +4,7 @@ class Const:
 	WELCOME_INITIAL = "> Welcome to our Dariel's Chat Server!!!"
 	WELCOME_MESSAGE = '> Welcome %s, type /help for a list of helpful commands.'
 	LIST_ALL_USERS = '> The users in the chat room are: '
-	LIST_ALL_CHANNELS = '> The channels in this room are room are: '
+	LIST_ALL_CHANNELS = '> The channels in this room are are: '
 	NOT_CHANNEL_MESSAGE = "> You are currently not in any channels:\n> Use /list to see a list of available channels.\n> Use /join [channel name] to join a channels."
 	ALREADY_IN_CHANNEL =  "> You are already in channel: " 
 	SERVER_VERSION = "> Server Version: {0}"

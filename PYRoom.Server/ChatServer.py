@@ -94,6 +94,7 @@ class ChatServer:
 		client.send(Const.WELCOME_MESSAGE % client.name)
 		client.send(Const.RULES)
 		self.send_server_name(client) #sets the client the server name (Meta)
+		self.send_gui_channels(client) #sets channel list (meta)
 
 		#handler loop
 		while not client.closed:
@@ -196,6 +197,10 @@ class ChatServer:
 				return chnl
 		return None
 
+	def send_gui_channels(self, client):
+		for channel in self.channels.values():
+			client.send("/channel add {0} {1}".format(channel.name, len(channel.clients)))
+
 	def send_server_name(self, client):
 		client.send("/servername " + self.SERVER_CONFIG["SERVER_NAME"])
 	
@@ -221,6 +226,15 @@ class ChatServer:
 				return user
 		return None
 
+	def add_channel(self, channelName):
+		targetChnl = Channel(channelName)
+		self.channels[channelName] = targetChnl
+
+		#send update
+		for client in self.clients.values():
+			client.send("/channel add {0}".format(targetChnl.name))
+
+		return targetChnl
 
 	#handlers
 	def send_message(self, client, chatMessage):
@@ -262,7 +276,7 @@ class ChatServer:
 			client.send("> Logged in successfully.")
 		else:
 			client.send("> Invalid username or password.")
-
+	
 	def silence(self, client, params):
 		if not client.isOperator:
 			client.send(Const.MUST_BE_OP)
@@ -392,16 +406,18 @@ class ChatServer:
 
 		#create channel if doesnt exist
 		if targetChnl == None:
-			targetChnl = Channel(channelName)
-			self.channels[channelName] = targetChnl
+			targetChnl = self.add_channel(channelName)
 
 		#if user is in channel
 		if usrChnl == targetChnl:
 			client.send(Const.ALREADY_IN_CHANNEL + channelName)
 		else:
-			if usrChnl != None: #removes him from old channel
-				usrChnl.remove_client(client)
+			#if usrChnl != None: #removes him from old channel
+			#	usrChnl.remove_client(client)
 			targetChnl.add_client(client)
+			client.send("/joined " + targetChnl.name)
+
+
 	def topic(self, client, params):
 		if len(params) < 2:
 			self.help(client)

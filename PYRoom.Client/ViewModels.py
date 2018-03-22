@@ -1,12 +1,14 @@
-class ChannelQueue():
+class ChannelOP():
 	def __init__(self, operation, name):
 		self.op = operation
 		self.name = name
+		self.message = ""
 
 class ChannelVM():
-    def __init__(self):
-        self.name = "Johns Room"
-        self.userCount = 10
+    def __init__(self, name, listbox):
+        self.name = name
+        self.listbox = listbox
+        self.messages = ''
 
 class AppVM():
 	def __init__(self):
@@ -14,6 +16,6 @@ class AppVM():
 		self.myMessages = ''
 		self.serverName = 'PyRoom'
 		self.isNewMessage = False
+		self.currentChannel = None
 		self.channels = {}
 		self.channelQueue = []
-		self.userQueue = []

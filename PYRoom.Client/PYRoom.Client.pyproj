@@ -30,9 +30,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ConnectPrompt.py" />
-    <Compile Include="NewChatRoomPrompt.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="main.py" />
     <Compile Include="ViewModels.py" />
     <Compile Include="WindowMain.py">
@@ -41,9 +38,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ConnectPrompt.xaml" />
-    <Content Include="NewChatRoomPrompt.xaml">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="WindowMain.xaml">
       <SubType>Designer</SubType>
     </Content>

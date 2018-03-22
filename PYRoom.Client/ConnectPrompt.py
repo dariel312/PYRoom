@@ -1,7 +1,6 @@
 import wpf
 from System.Windows.Controls import *
 from System.Windows import *
-from NewChatRoomPrompt import *
 from ViewModels import *
 from System.Windows import Window
 
