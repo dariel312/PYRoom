@@ -166,8 +166,10 @@ class ChatServer:
 					self.set_name(client, params)
 				elif op == '/silence':
 					self.silence(client, params)
-				else:
-					self.send_message(client, chatMessage)
+				elif op == '/message':
+					self.message(client, params) #CREATE METHOD
+				#else: #removed since user doesnt have a default channel
+				#	self.send_message(client, chatMessage)
 
 	def set_restart_callback(callback):
 		pass
