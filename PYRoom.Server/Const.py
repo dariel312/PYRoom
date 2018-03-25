@@ -20,7 +20,7 @@ class Const:
 	SHUTTING_DOWN = "> Server is shutting down."
 	USERS =  "> Nick: {0}\tChannel: {2}"
 	SETNAME_SUCCESS = "> Real name changed to {0}."
-	WHO_IS = "> Nick: {0}\tReal: {1}\tAway: {2}\tAuthenticated: {3}\tChannel: {4}"
+	WHO_IS = "> Nick: {0}\tReal: {1}\tAway: {2}\tAuthenticated: {3}\tChannel(s): {4}"
 	HELP_MESSAGE = """
 > The list of commands available are:
 /help                   - Show the instructions

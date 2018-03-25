@@ -92,7 +92,10 @@ class WindowMain(Window):
 		prompt.ShowDialog()
 		if prompt.result:
 			self.submit_message("/connect {0} {1}".format(prompt.host, prompt.port))
-		
+
+	def Menu_ClearChat_Click(self, sender, e):
+		self.clear_chatbox()
+	
 	def channels_SelectionChanged(self, sender, e):
 		newName = sender.SelectedItem.Content
 		if  self.model.currentChannel == None or newName!= self.model.currentChannel.name: #if user click diff channel change model chnl
@@ -109,7 +112,13 @@ class WindowMain(Window):
 		"""used to close form GUI events not from console"""
 		self.submit_message("/quit")
 
-	
+	def clear_chatbox(self):
+		"""Clears chat window, cleans it out"""
+		if self.model.currentChannel == None: #update messages b4 youre in channel
+			self.model.messages = ""
+		else:
+			self.model.currentChannel.messages = ""
+
 	def submit_message(self, message):
 		"""submits message from text box."""
 		self.handle_send_command(message)
@@ -135,12 +144,12 @@ class WindowMain(Window):
 
 		if op == '/connect' and not self.client.isClientConnected:
 			self.connect(params)
-		if op == '/quit':
+		elif op == '/quit':
 			self.send_message("/quit")
 			self.client.disconnect()
-		if list(msg)[0] == '/':
+		elif list(msg)[0] == '/':
 			self.send_command(msg)
-		else:
+		elif self.model.currentChannel is not None:
 			self.send_message(params)
 
 	def client_thread(self):

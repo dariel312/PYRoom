@@ -167,9 +167,9 @@ class ChatServer:
 				elif op == '/silence':
 					self.silence(client, params)
 				elif op == '/message':
-					self.message(client, params) #CREATE METHOD
-				#else: #removed since user doesnt have a default channel
-				#	self.send_message(client, chatMessage)
+					self.message(client, params) 
+				else: #removed since user doesnt have a default channel
+					self.help(client)
 
 	def set_restart_callback(callback):
 		pass
@@ -194,10 +194,19 @@ class ChatServer:
 		return None
 
 	def get_user_channel(self, client):
+		"""Returns the current channel the user is in (Deprecated)"""
 		for chnl in self.channels.values():
 			if client.uid in chnl.clients: #returns first occurence of user in channel
 				return chnl
 		return None
+
+	def get_user_channels(self, client):
+		"""Returns a list of channels the user is in"""
+		channels = []
+		for chnl in self.channels.values():
+			if client.uid in chnl.clients:
+				channels.append(chnl)
+		return channels
 
 	def send_gui_channels(self, client):
 		for channel in self.channels.values():
@@ -239,17 +248,18 @@ class ChatServer:
 		return targetChnl
 
 	#handlers
-	def send_message(self, client, chatMessage):
-		usrChnl = self.get_user_channel(client)
+	#def send_message(self, client, chatMessage):
+	#	""" Sends message to users current channel (Deprecated)"""
+	#	usrChnl = self.get_user_channel(client)
 
-		if client.isSilenced:
-			client.send("> You are silenced.")
-			return
+	#	if client.isSilenced:
+	#		client.send("> You are silenced.")
+	#		return
 
-		if usrChnl is not None: #if user is in channel broadcast
-			usrChnl.broadcast_message(chatMessage, client)
-		else:
-			client.send(Const.NOT_CHANNEL_MESSAGE)
+	#	if usrChnl is not None: #if user is in channel broadcast
+	#		usrChnl.broadcast_message(chatMessage, client)
+	#	else:
+	#		client.send(Const.NOT_CHANNEL_MESSAGE)
 
 	def user_host(self, client, params):
 		for username in params[1:]:
@@ -309,26 +319,27 @@ class ChatServer:
 
 	def users(self, client):
 		for user in self.clients.values():
-			channel = self.get_user_channel(user)
+			channels = self.get_user_channels(user)
+			chnlStr = ''
 
-			if channel is not None:
-				cName = channel.name
+			if len(channels) == 0:
+				chnlStr = "None"
 			else:
-				cName = "None"
+				chnlStr = ', '.join([c.name for c in channels]) #only thing I like about python
 
-			client.send("> Nick: {0}\tChannel:{1}".format(user.name, cName))
+			client.send("> Nick: {0}\tChannel(s): {1}".format(user.name, chnlStr))
 
 	def whois(self, client, params):
 		for name in params[1:]:
 			tUser = self.get_user_with_name(name)
-			channel = self.get_user_channel(tUser)
+			channels = self.get_user_channels(tUser)
 
-			if channel is not None:
-				cName = channel.name
+			if len(channels) == 0:
+				chnlStr = "None"
 			else:
-				cName = "None"
+				chnlStr = ', '.join([c.name for c in channels])
 
-			client.send(Const.WHO_IS.format(tUser.name, tUser.realName, tUser.isAway, tUser.isLoggedIn, cName))
+			client.send(Const.WHO_IS.format(tUser.name, tUser.realName, tUser.isAway, tUser.isLoggedIn, chnlStr))
 
 	def private_message(self, client, msgParams, useAutoReply=True):
 
@@ -387,20 +398,19 @@ class ChatServer:
 		if target is None:
 			client.send("> User not found")
 
-		channel = self.channels.get(channelName)
-		userChannel = self.get_user_channel(target)
+		targetChannel = self.channels.get(channelName)
+		userChannels = self.get_user_channels(target)
 
-		if channel is None: #if doesnt exist add it
-			channel = Channel(channelName)
-			self.channels[channelName] = channel
+		if targetChannel is None: #if doesnt exist add it
+			targetChannel = Channel(targetChannel)
+			self.channels[channelName] = targetChannel
 
-		if userChannel is channel: #user already in channel
-			client.send(Const.ALREADY_IN_CHANNEL + channelName)
-			return
+		for usrChn in userChannels:
+			if usrChn is targetChannel: #user already in channel
+				client.send(Const.ALREADY_IN_CHANNEL + channelName)
+				return
 
-		if userChannel != None: #change suer channel
-			userChannel.remove_client(target)
-		channel.add_client(target)
+		targetChannel.add_client(target)
 		client.send("> {0} has been added to {1}.".format(targetName, channelName))
 
 	def join(self, client, chatMessage):
@@ -412,7 +422,7 @@ class ChatServer:
 			return 
 
 		channelName = chatMessage.split()[1]
-		usrChnl = self.get_user_channel(client)
+		usrChnls = self.get_user_channels(client)
 		targetChnl = self.channels.get(channelName)
 
 		#create channel if doesnt exist
@@ -420,13 +430,14 @@ class ChatServer:
 			targetChnl = self.add_channel(channelName)
 
 		#if user is in channel
-		if usrChnl == targetChnl:
-			client.send(Const.ALREADY_IN_CHANNEL + channelName)
-		else:
-			#if usrChnl != None: #removes him from old channel
-			#	usrChnl.remove_client(client)
-			targetChnl.add_client(client)
-			client.send("/joined " + targetChnl.name)
+		for chn in usrChnls:
+			if chn is targetChnl:
+				client.send(Const.ALREADY_IN_CHANNEL + channelName)
+				return
+		
+		#add him to channel if nothing fails
+		targetChnl.add_client(client)
+		client.send("/joined " + targetChnl.name)
 
 
 	def topic(self, client, params):
@@ -441,7 +452,7 @@ class ChatServer:
 			return 
 
 		if len(params) > 2:#set topic
-			topic = ' '.join(parmas[2:])
+			topic = ' '.join(params[2:])
 			chnnl.set_topic(topic)
 		else: #send topic
 			client.send("> Topic: " + chnnl.topic)
@@ -457,7 +468,7 @@ class ChatServer:
 			return
 
 		trget = self.get_user_with_name(params[2])
-		usrChnl = self.get_user_channel(trget)
+		usrChnl = self.get_user_channel(trget) #FIX
 		trgChnl = self.channels.get(params[1])
 		
 		if usrChnl is None or usrChnl != trgChnl:
@@ -497,13 +508,11 @@ class ChatServer:
 		oldName = client.name
 		client.name = name
 		client.send("> Nickname changed to " + name)
-		chnl = self.get_user_channel(client)
+		chnls = self.get_user_channels(client)
 
 		#notify users in channel of new name
-		if chnl != None:
-			for c in chnl.clients.values():
-				if c is not client:
-					c.send(Const.CHANGED_NAME.format(oldName, client.name))
+		for chn in chnls:
+			chn.notify_nick_change(client, oldName)
 
 
 	def away(self, client, params):
@@ -522,12 +531,12 @@ class ChatServer:
 	def time(self, client):
 		dt = datetime.datetime.now()
 		client.send("> Time:" + dt.strftime('%Y-%m-%d %H:%M:%S'))
+
 	def quit(self, client):
 		#remove from channel
-		channel = self.get_user_channel(client)
-		if channel != None:
-			channel.remove_client(client)
-
+		chnls = self.get_user_channels(client)
+		for chnl in chnls:
+			chnl.remove_client(client)
 		#disconnect
 		client.send(Const.DISCONNECTED)
 		#client.send('/quit')

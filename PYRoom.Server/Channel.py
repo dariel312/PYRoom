@@ -4,7 +4,7 @@ class Channel:
 	def __init__(self, name):
 		self.clients = {} # Client Name -> Socket
 		self.name = name
-		self.topic = ''
+		self.topic = 'None'
 
 	def add_client(self, client):
 		self.clients[client.uid] = client
@@ -14,7 +14,9 @@ class Channel:
 		for c in self.clients.values():
 			if c.name is client.name:
 				chatMessage = '/channel message {0} > You have joined the channel {1}!'.format(self.name, self.name)
-				c.send(chatMessage + "\n" + Const.CHANNEL_USER_COUNT.format(len(self.clients)))
+				chatMessage += "\n> Channel Topic: " + self.topic
+				chatMessage += "\n" + Const.CHANNEL_USER_COUNT.format(len(self.clients))
+				c.send(chatMessage)
 			else:
 				chatMessage = '/channel message {0} > {1} has joined the channel {2}!'.format(self.name, client.name, self.name)
 				c.send(chatMessage)
@@ -23,7 +25,7 @@ class Channel:
 	def broadcast_message(self, message, senderClient):
 		for client in self.clients.values():
 			if client.name != senderClient.name:
-				client.send("/channel message {0} : {1}".format(self.name, senderClient.name, message))
+				client.send("/channel message {0} {1}: {2}".format(self.name, senderClient.name, message))
 			else:
 				client.send('/channel message {0} You: {1}'.format(self.name, message))
 
@@ -39,3 +41,8 @@ class Channel:
 	def set_topic(self, topic):
 		self.topic = topic
 		self.send_to_all("/channel message {0} > Topic has been changed to: {1}".format(self.name, topic))
+
+	def notify_nick_change(self, client, oldName):
+		for c in self.clients.values():
+			if c is not client:
+				c.send("/channel message {0} ".format(self.name) + Const.CHANGED_NAME.format(oldName, client.name))

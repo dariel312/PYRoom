@@ -31,6 +31,7 @@
                     <Button.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Connect" Click="Menu_Connect_Click"/>
+                            <MenuItem Header="Clear Chat" Click="Menu_ClearChat_Click"/>
                             <Separator />
                             <MenuItem Header="Exit" Click="Menu_Exit_Click" />
                         </ContextMenu>
