@@ -81,7 +81,7 @@ class WindowMain(Window):
 			self.sidebar.Visibility = Visibility.Collapsed
 
 	def Send_Click(self, sender, e):
-		self.submit_message(self.ui.myMessage)
+		self.submit_message(self.ui.myMessage.Text)
 
 	def Menu_Click(self, sender, e):
 		sender.ContextMenu.IsOpen = True
@@ -97,7 +97,7 @@ class WindowMain(Window):
 		newName = sender.SelectedItem.Content
 		if  self.model.currentChannel == None or newName!= self.model.currentChannel.name: #if user click diff channel change model chnl
 			if  self.model.currentChannel == None or not self.model.channels[newName].joined: #only sendif havent joined yet
-				self.send_message("/join " + newName)
+				self.send_command("/join " + newName)
 			self.model.currentChannel = self.model.channels.get(newName)
 		self.model.messages = self.model.currentChannel.messages
 		self.model.isNewMessage = True #scroll to bottonm now
@@ -116,23 +116,32 @@ class WindowMain(Window):
 		self.ui.myMessage.Text = ''
 
 	
-	def send_message(self, message):
+	def send_message(self, params):
 		"""sends message to server"""
-		self.client.send(message + "\r\n")
+		message = " ".join(params)
+		self.client.send("/message {0} {1}\r\n".format(self.model.currentChannel.name, message))
 
+	def send_command(self, message):
+		"""sends command to server"""
+		self.client.send(message + "\r\n")
 
 	def handle_send_command(self, msg):
 		"""intercepts send commands and dispatches them """
 		params = msg.split(' ')
 		op = params[0].lower()
 
+		if len(msg) == 0:
+			return #pressed enter with no msg typed
+
 		if op == '/connect' and not self.client.isClientConnected:
 			self.connect(params)
 		if op == '/quit':
 			self.send_message("/quit")
 			self.client.disconnect()
+		if list(msg)[0] == '/':
+			self.send_command(msg)
 		else:
-			self.send_message(msg)
+			self.send_message(params)
 
 	def client_thread(self):
 		while self.client.isClientConnected:

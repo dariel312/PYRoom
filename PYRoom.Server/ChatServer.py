@@ -259,6 +259,15 @@ class ChatServer:
 	def rules(self, client):
 		client.send(Const.RULES)
 
+	def message(self, client, params):
+		channelName = params[1]
+		message = ' '.join(params[2:])
+
+		channel = self.channels.get(channelName)
+		if channel != None:
+			channel.broadcast_message(message, client)
+
+
 	def oper(self, client, params):
 		if len(params) is not 3:
 			self.help(client)
