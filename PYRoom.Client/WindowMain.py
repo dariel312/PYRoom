@@ -54,7 +54,9 @@ class WindowMain(Window):
 			elif channelOP.op == "message":
 				self.model.channels[channelOP.name].messages += channelOP.message + '\n'
 
-				if channelOP.name == self.model.currentChannel.name:
+
+
+				if self.model.currentChannel != None and channelOP.name == self.model.currentChannel.name:
 					self.model.messages += channelOP.message + "\n"
 					self.model.isNewMessage = True
 

@@ -200,6 +200,15 @@ class ChatServer:
 				return chnl
 		return None
 
+	def is_user_in_channel(self, client, channelName):
+		"""Returns true if the user is in the channel"""
+		channels = self.get_user_channels(client)
+
+		for c in channels:
+			if c.name == channelName:
+				return True
+		return False
+
 	def get_user_channels(self, client):
 		"""Returns a list of channels the user is in"""
 		channels = []
@@ -396,22 +405,26 @@ class ChatServer:
 		target = self.get_user_with_name(targetName)
 
 		if target is None:
-			client.send("> User not found")
+			client.send("> User not found.")
+			return
 
 		targetChannel = self.channels.get(channelName)
 		userChannels = self.get_user_channels(target)
 
 		if targetChannel is None: #if doesnt exist add it
-			targetChannel = Channel(targetChannel)
-			self.channels[channelName] = targetChannel
+			client.send("> Channel does not exist.")
+			return
 
-		for usrChn in userChannels:
-			if usrChn is targetChannel: #user already in channel
-				client.send(Const.ALREADY_IN_CHANNEL + channelName)
-				return
+		target.send("> {0} has invited you to {1} channel. Type /join {0} {1} to accept this request.".format(client.name, targetChannel.name))
+		targetChannel.notify_invite(client, target)
 
-		targetChannel.add_client(target)
-		client.send("> {0} has been added to {1}.".format(targetName, channelName))
+		#no longer add the user directly (deprecated)
+		#for usrChn in userChannels:
+		#	if usrChn is targetChannel: #user already in channel
+		#		client.send(Const.ALREADY_IN_CHANNEL + channelName)
+		#		return
+
+		#targetChannel.add_client(target)
 
 	def join(self, client, chatMessage):
 		isInSameRoom = False
@@ -459,8 +472,8 @@ class ChatServer:
 
 
 	def kick(self, client, params):
-		if not client.isoperator:
-			client.send(const.must_be_op)
+		if not client.isOperator:
+			client.send(Const.MUST_BE_OP)
 			return
 		
 		if len(params) is not 3:
@@ -468,15 +481,19 @@ class ChatServer:
 			return
 
 		trget = self.get_user_with_name(params[2])
-		usrChnl = self.get_user_channel(trget) #FIX
+
+		if trget == None:
+			client.send("> User does not exist.")
+
+		usrChnls = self.get_user_channels(trget)
 		trgChnl = self.channels.get(params[1])
 		
-		if usrChnl is None or usrChnl != trgChnl:
+		if  not self.is_user_in_channel(trget, trgChnl.name):
 			client.send("> User not in that channel.")
 			return
 
 		trgChnl.remove_client(client)
-		client.send("> You have been kicked from the channel.")
+		client.send("> You have been kicked from the channel. Rejoining a channel you have been kicked from may result in being banned.")
 
 	def version(self, client):
 		client.send(Const.SERVER_VERSION.format(self.SERVER_CONFIG["VERSION"]))

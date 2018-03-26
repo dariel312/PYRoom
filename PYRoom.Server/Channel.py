@@ -46,3 +46,8 @@ class Channel:
 		for c in self.clients.values():
 			if c is not client:
 				c.send("/channel message {0} ".format(self.name) + Const.CHANGED_NAME.format(oldName, client.name))
+
+	def notify_invite(self, inviter, invitee):
+		for c in self.clients.values():
+			c.send("/channel message {0} > {1} has invited {2} to this channel.".format(self.name, inviter.name, invitee.name))
+
