@@ -9,13 +9,15 @@
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <IsWindowsApplication>True</IsWindowsApplication>
-    <InterpreterId>IronPython|2.7-32</InterpreterId>
+    <InterpreterId>IronPython|2.7-64</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <OutputPath>.</OutputPath>
     <Name>PYRoom.Client</Name>
     <RootNamespace>PYRoom.Client</RootNamespace>
     <DebugStdLib>False</DebugStdLib>
-    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <EnableNativeCodeDebugging>True</EnableNativeCodeDebugging>
+    <CommandLineArguments>
+    </CommandLineArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -38,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ConnectPrompt.xaml" />
+    <Content Include="test_script.txt" />
     <Content Include="WindowMain.xaml">
       <SubType>Designer</SubType>
     </Content>

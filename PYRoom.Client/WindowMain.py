@@ -13,7 +13,7 @@ import threading
 
 class WindowMain(Window):
 
-	def __init__(self):
+	def __init__(self, host = None, port = None, testFile = None):
 		self.ui = wpf.LoadComponent(self, 'WindowMain.xaml')
 		self.sidebar = self.ui.sidebar
 		self.model = AppVM() #object to which UI thread and socket thread will communicate
@@ -25,6 +25,17 @@ class WindowMain(Window):
 		self.updater.Interval = TimeSpan(0,0,0,0,33)
 		self.updater.Start()
 
+		if host != None and port != None:
+			p = int(port)
+			h = str(host)
+			self.submit_message("/connect {0} {1}".format(h,p))
+
+		if testFile != None:
+			try:
+				file = open(testFile)
+				text = file.read()
+			except:
+				MessageBox.Show("Failed to open " + testFile)
 
 	def update_UI(self, sender, e):
 		"""updates ui for data changes"""
