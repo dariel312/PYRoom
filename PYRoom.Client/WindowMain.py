@@ -30,10 +30,15 @@ class WindowMain(Window):
 			h = str(host)
 			self.submit_message("/connect {0} {1}".format(h,p))
 
+		#run test script
 		if testFile != None:
 			try:
 				file = open(testFile)
 				text = file.read()
+				lines = text.split("\n")
+				for line in lines:
+					self.submit_message(line)
+				MessageBox.Show("Test file has been run.")
 			except:
 				MessageBox.Show("Failed to open " + testFile)
 
@@ -46,6 +51,7 @@ class WindowMain(Window):
 			self.ui.messages.Text = self.model.currentChannel.messages
 
 		self.ui.serverName.Content = self.model.serverName
+		self.ui.windowTitle.Content = self.model.serverName
 		self.ui.Title = self.model.serverName
 
 		#update message box
@@ -98,7 +104,24 @@ class WindowMain(Window):
 
 	def Menu_Click(self, sender, e):
 		sender.ContextMenu.IsOpen = True
-	
+
+	def Minimize_Click(self, sender, e):
+		self.WindowState = WindowState.Minimized
+
+	def Maximize_Click(self, sender, e):
+		if self.WindowState == WindowState.Normal:
+			self.WindowState = WindowState.Maximized
+		else:
+			self.WindowState = WindowState.Normal
+
+	def Exit_Click(self, sender, e):
+		self.close()
+
+	def Rectangle_MouseDown(self, sender, e):
+		if(e.ChangedButton == MouseButton.Left):
+			if(self.WindowState == WindowState.Maximized):
+				self.WindowState = WindowState.Normal
+			self.DragMove()
 		
 	def Menu_Connect_Click(self, sender, e):
 		prompt = ConnectPrompt()

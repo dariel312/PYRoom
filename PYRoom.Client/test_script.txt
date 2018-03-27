@@ -1,0 +1,9 @@
+/connect 127.0.0.1 50000
+/nick DARIEL
+/time
+/rules
+/join Dogs
+/join Pokemon
+/join OverWatch
+/topic OverWatch OverWatch is awesome!
+Hey is this OverWatch chat? I really love OverWatch!

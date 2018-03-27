@@ -24,8 +24,10 @@ class Const:
 	HELP_MESSAGE = """
 > The list of commands available are:
 /help                   - Show the instructions
+/connect <host> <port>  - Connects your ChatRoom Client to the server (Handled in the client)
 /nick <new name>		- Changes your display name if the name is not registered
-/join [channel_name]    - To create or switch to a channel.
+/join <channle name>   - To create or switch to a channel.
+/part <channel name>	- Leaves a channel
 /quit                   - Exits the program.
 /info					- Displays info about the server
 /list                   - Lists all available channels.

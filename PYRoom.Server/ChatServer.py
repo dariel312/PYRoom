@@ -135,7 +135,9 @@ class ChatServer:
 				elif op == '/user':
 					self.user(client)
 				elif op == '/join':
-					self.join(client, chatMessage)
+					self.join(client, command)
+				elif op == '/part':
+					self.part(client, params)
 				elif op == '/version':
 					self.version(client)
 				elif op == '/privmsg':
@@ -452,6 +454,18 @@ class ChatServer:
 		targetChnl.add_client(client)
 		client.send("/joined " + targetChnl.name)
 
+	def part(self, client, params):
+		
+		if len(params) is not 2:
+			self.help(client)
+			return
+
+		usrChnls = self.get_user_channels(client)
+		trgChnl = self.channels.get(params[1])
+		
+		if self.is_user_in_channel(client, trgChnl.name):
+			trgChnl.remove_client(client)
+			client.send("> You have left {0}.".format(trgChnl.name))
 
 	def topic(self, client, params):
 		if len(params) < 2:
@@ -480,20 +494,22 @@ class ChatServer:
 			self.help(client)
 			return
 
-		trget = self.get_user_with_name(params[2])
+		trget = self.get_user_with_name(params[1])
 
 		if trget == None:
 			client.send("> User does not exist.")
+			return
 
 		usrChnls = self.get_user_channels(trget)
-		trgChnl = self.channels.get(params[1])
+		trgChnl = self.channels.get(params[2])
 		
 		if  not self.is_user_in_channel(trget, trgChnl.name):
 			client.send("> User not in that channel.")
 			return
 
-		trgChnl.remove_client(client)
-		client.send("> You have been kicked from the channel. Rejoining a channel you have been kicked from may result in being banned.")
+		trgChnl.remove_client(trget)
+		trget.send("> You have been kicked from the channel. Rejoining a channel you have been kicked from may result in being banned.")
+		client.send("> You have kicked {0} from the channel.".format(trget.name))
 
 	def version(self, client):
 		client.send(Const.SERVER_VERSION.format(self.SERVER_CONFIG["VERSION"]))

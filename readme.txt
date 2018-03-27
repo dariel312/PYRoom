@@ -16,12 +16,14 @@ Server is located in a seperate folder\project called PYRoom.Server
 The server was written using sample 2 with channels given to us, but I had to make a lot of changes to make it run for me.
 
 To Run:
-execute PYRoom.Server/main.py
+> py PYRoom.Server/main.py
 
 WORKING CHAT COMMANDS
+/connect <host> <port>  - Connects your ChatRoom Client to the server (Handled in the client)
 /help                   - Show the instructions
 /nick <new name>		- Changes your display name if the name is not registered
-/join [channel_name]    - To create or switch to a channel.
+/join <channel name>    - To create or switch to a channel.
+/part <channel name>	- Leaves a channel
 /quit                   - Exits the program.
 /info					- Displays info about the server
 /list                   - Lists all available channels.
@@ -49,7 +51,9 @@ COMMAND LINE INTERACTION
 /channels
 /restart
 
-
+COMMAND LINE ARGS:
+-p <listener port>
+-db <db path> 
 
 
 
@@ -63,14 +67,18 @@ For it to run you must have IronPython installed otherwise it will not work.
 Download: http://ironpython.net/download/
 
 
-To Run:
-Execute PyRoom.Client/main.py
+To Run (Iron Python command):
+> ipy PyRoom.Client/main.py
 
+COMMAND LINE Args:
+-host <host ip>
+-p <host port>
+-t <test file>
 
 Some Interesting things about the client:
--There is no file menu
+-There is no file menu (Too old and basic)
 -There is a button in the dropdown menu on the right of the screen that allows you to clear the chat window
--There is a button between the Channel list and the chat window that allows you to collapse the channel list window
+-There is a button between the Channel list and the chat window that allows you to collapse the channel list panel
 -Upon connecting to the server the title of the window and the Header above the chat window will update to the name of the chat server
 -The whole design of the GUI was written XAML (similar to XML and HTML)
 -Supports multichannel
@@ -83,7 +91,6 @@ WHATS MISSING
 	/kill
 	/knock
 	/mode
-	/part
 	/user
 	/wallops
 	/who
