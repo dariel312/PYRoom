@@ -4,3 +4,5 @@
 
 /.vs
 /PYRoom.Server/__pycache__
+/PyRoom.WPF/bin/Debug
+/PyRoom.WPF/obj/Debug
